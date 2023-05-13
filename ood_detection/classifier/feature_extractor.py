@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 import tensorflow_hub as hub
+from sentence_transformers import SentenceTransformer
 import gc
 
 def build_features(feature_extractor: str, 
@@ -9,23 +10,28 @@ def build_features(feature_extractor: str,
                    text_val: pd.Series = None, 
                    text_val_ckpt: pd.Series = None, intent_val_ckpt: pd.Series = None,
                    return_vec: bool = False,
-                   gibberish_list: list = None, model = None,
+                   model = None,
                    lowercase: bool = True,
                    **kwargs,
                   ):
     if feature_extractor == "bow":
-        output = build_bow(text_train,intent_train,text_val,gibberish_list,
+        output = build_bow(text_train,intent_train,text_val,
                            lowercase=lowercase,return_vec=return_vec,
                            **kwargs)
     elif feature_extractor == "tf_idf":
-        output = build_tfidf(text_train,intent_train,text_val,gibberish_list,
+        output = build_tfidf(text_train,intent_train,text_val,
                              lowercase=lowercase,return_vec=return_vec,
                              **kwargs)
     elif feature_extractor == "use":
-        output = build_use(model,text_train,intent_train,text_val,gibberish_list)
+        output = build_use(model,text_train,intent_train,text_val)
     elif feature_extractor == "use_best_ckpt":
-        output = build_use(model,text_train,intent_train,text_val,gibberish_list)
-        output_ckpt = build_use(model,text_val_ckpt,intent_val_ckpt,None,None)
+        output = build_use(model,text_train,intent_train,text_val)
+        output_ckpt = build_use(model,text_val_ckpt,intent_val_ckpt,None)
+    elif feature_extractor == "mpnet":
+        output = build_mpnet(model,text_train,intent_train,text_val)
+    elif feature_extractor == "mpnet_best_ckpt":
+        output = build_mpnet(model,text_train,intent_train,text_val)
+        output_ckpt = build_mpnet(model,text_val_ckpt,intent_val_ckpt,None)
     else:
         print("Feature Extractor's not supported.")
         return
@@ -40,8 +46,8 @@ def load_feature_extractor(feature_extractor:str):
         return
     elif feature_extractor in ["use","use_best_ckpt"]:
         return load_model("use")
-    elif feature_extractor in ["xlm","xlm_best_ckpt","xlm_mha"]:
-        return load_model("tf_xlm")
+    elif feature_extractor in ["mpnet","mpnet_best_ckpt"]:
+        return load_model("mpnet")
     else:
         print("Feature Extractor's not supported.")
         return
@@ -50,6 +56,8 @@ def load_feature_extractor(feature_extractor:str):
 def load_model(name: str):
     if name == "use":
         return hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")
+    elif name == "mpnet":
+        return SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
     else:
         print("Model's not supported.")
         return
@@ -61,25 +69,10 @@ def load_model(name: str):
 #     else:
 #         print("Tokenizer's not supported.")
 #         return
-    
-
-def tf_get_use_embeddings_from_text(use_model,input,bs=64):
-    # use_model = load_model("use")
-    test_xc = [input] if isinstance(input, str) is True else input
-    
-    output = []
-    for i in range(0,len(test_xc),bs):
-        output.extend(use_model(test_xc[i:i+bs]).numpy())
-    output = np.array(output)
-
-    del use_model
-    gc.collect()
-    
-    return output
 
 
-def build_bow(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series, 
-              gibberish_list:list,lowercase: bool, return_vec: bool = False, vectorizer = None,
+def build_bow(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series,
+              lowercase: bool, return_vec: bool = False, vectorizer = None,
               **kwargs) -> pd.DataFrame:
     if vectorizer is None:
         vectorizer = CountVectorizer(lowercase=lowercase,**kwargs)
@@ -103,8 +96,8 @@ def build_bow(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series
             return df_train_bow, y_train, df_val_bow, vectorizer
     
 
-def build_tfidf(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series, 
-                gibberish_list:list,lowercase: bool, return_vec: bool = False, vectorizer = None,
+def build_tfidf(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series,
+                lowercase: bool, return_vec: bool = False, vectorizer = None,
                 **kwargs) -> pd.DataFrame:
     if vectorizer is None:
         vectorizer = TfidfVectorizer(lowercase=lowercase,**kwargs)
@@ -128,8 +121,7 @@ def build_tfidf(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Seri
             return df_train_tfidf, y_train, df_val_tfidf, vectorizer
 
 
-def build_use(model,train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series,
-                  gibberish_list:list,) -> np.array:
+def build_use(model,train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series) -> np.array:
     #Train corpus embedding
     X_train = tf_get_use_embeddings_from_text(model,train_corpus.to_list())
     
@@ -139,3 +131,41 @@ def build_use(model,train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.
         #Val corpus embedding
         X_val = tf_get_use_embeddings_from_text(model,val_corpus.to_list())
         return X_train, y_train, X_val
+
+
+def tf_get_use_embeddings_from_text(use_model,input,bs=64):
+    # use_model = load_model("use")
+    test_xc = [input] if isinstance(input, str) is True else input
+    
+    output = []
+    for i in range(0,len(test_xc),bs):
+        output.extend(use_model(test_xc[i:i+bs]).numpy())
+    output = np.array(output)
+
+    del use_model
+    gc.collect()
+    
+    return output
+
+
+def build_mpnet(model,train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series,) -> np.array:
+    #Train corpus embedding
+    X_train = get_mpnet_embeddings_from_text(model,train_corpus.to_list())
+    
+    if val_corpus is None:
+        return X_train, y_train
+    else:
+        #Val corpus embedding
+        X_val = get_mpnet_embeddings_from_text(model,val_corpus.to_list())
+        return X_train, y_train, X_val
+    
+
+def get_mpnet_embeddings_from_text(mpnet_model,input):
+    
+    test_xc = [input] if isinstance(input, str) is True else input
+    output = mpnet_model.encode(test_xc)
+    
+    del mpnet_model
+    gc.collect()
+    
+    return output

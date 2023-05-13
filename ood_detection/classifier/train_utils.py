@@ -39,10 +39,10 @@ def fit_rf(X: pd.DataFrame, y: pd.Series):
     return clf
 
 
-def fit_nn(x_train: np.array, y: pd.Series, 
+def fit_mlp(feature_extractor: str, x_train: np.array, y: pd.Series, 
             x_val: np.array = None, y_val: pd.Series = None,
             **kwargs):
-    clf = MLP()
+    clf = MLP(feature_extractor)
     clf.fit(x_train,y,x_val,y_val,**kwargs)
     return clf
 

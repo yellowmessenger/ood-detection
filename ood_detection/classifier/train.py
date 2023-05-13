@@ -68,23 +68,17 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
             elif model == "rf":
                 from ood_detection.classifier.train_utils import fit_rf
                 clf = fit_rf(X_train,y_train)
-            elif model == "nn": 
-                from ood_detection.classifier.train_utils import fit_nn           
-                clf,trained_intents_map = fit_nn(X_train,y_train,**kwargs)
-            elif model == "nn_best_ckpt":   
-                from ood_detection.classifier.train_utils import fit_nn         
-                clf,trained_intents_map = fit_nn(X_train,y_train,X_val_ckpt, y_val_ckpt,**kwargs)
+            elif model == "mlp": 
+                from ood_detection.classifier.train_utils import fit_mlp         
+                clf = fit_mlp(feature_extractor,X_train,y_train,**kwargs)
+            elif model == "mlp_best_ckpt":   
+                from ood_detection.classifier.train_utils import fit_mlp         
+                clf = fit_mlp(feature_extractor.X_train,y_train,X_val_ckpt, y_val_ckpt,**kwargs)
             else:
                 print("Model's not supported.")
                 return
 
-            if model in ["nn","nn_best_ckpt"]:
-                probas = clf.predict(X_val,batch_size=32)
-                pred_ids = np.argmax(probas,axis=1)
-                val_pred = [trained_intents_map[pred_id] for pred_id in pred_ids]
-            else:
-                val_pred = clf.predict(X_val)
-
+            val_pred = clf.predict(X_val)
             report = classification_report(df_val["intent"],val_pred,
                                            zero_division=0,output_dict=True
                                           )
@@ -140,23 +134,23 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
     elif model == "rf":
         from ood_detection.classifier.train_utils import fit_rf
         clf_full = fit_rf(X_full,y_full)
-    elif model in ["nn","nn_best_ckpt"]:
-        from ood_detection.classifier.train_utils import fit_nn
-        if model == "nn":
-            clf_full,trained_intents_map = fit_nn(X_full,y_full,**kwargs)
-        elif model == "nn_best_ckpt":            
-            clf_full,trained_intents_map = fit_nn(X_full,y_full,X_val_ckpt, y_val_ckpt,**kwargs)
+    elif model in ["mlp","mlp_best_ckpt"]:
+        from ood_detection.classifier.train_utils import fit_mlp
+        if model == "mlp":
+            clf_full = fit_mlp(feature_extractor,X_full,y_full,**kwargs)
+        elif model == "mlp_best_ckpt":            
+            clf_full = fit_mlp(feature_extractor,X_full,y_full,X_val_ckpt, y_val_ckpt,**kwargs)
             
         if not return_metric:
             if feature_extractor in ["bow","tf_idf"]:
-                return clf_full,trained_intents_map,vec
+                return clf_full,vec
             else:
-                return clf_full,trained_intents_map
+                return clf_full
         else:
             if feature_extractor in ["bow","tf_idf"]:
-                return clf_full,trained_intents_map,output_metric_dict,vec
+                return clf_full,output_metric_dict,vec
             else:
-                return clf_full,trained_intents_map,output_metric_dict
+                return clf_full,output_metric_dict
     else:
         print("Model's not supported.")
         return

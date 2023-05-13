@@ -17,6 +17,7 @@ tqdm = "^4.65.0"
 tensorflow-addons = "^0.20.0"
 matplotlib = "^3.7.1"
 tensorflow-hub = "^0.13.0"
+sentence-transformers = "^2.2.2"
 
 
 [build-system]

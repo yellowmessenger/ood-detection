@@ -18,8 +18,8 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 class MLP:
-    def __init__():
-        pass
+    def __init__(self,feature_extractor: str):
+        self.feature_extractor = feature_extractor
 
     def fit(self,x_train: np.array, y: pd.Series,
             x_val: np.array = None, y_val: pd.Series = None,
@@ -119,15 +119,17 @@ class MLP:
         self.clf = clf
         self.trained_classes_mapping = list(self.label_encoder.classes_)
 
-    def predict(self,x_test: pd.Series, batch_size: int = 16):
-        x_test,_ = build_features("use",x_test,x_test,model=load_feature_extractor("use"))
+    def predict(self,x_test, batch_size: int = 16):
+        if isinstance(x_test, pd.Series):
+            x_test,_ = build_features(self.feature_extractor,x_test,x_test,model=load_feature_extractor(self.feature_extractor))
         probas = self.clf.predict(x_test, batch_size=batch_size)
         pred_ids = np.argmax(probas,axis=1)
         test_pred = [self.trained_classes_mapping[pred_id] for pred_id in pred_ids]
         return test_pred
     
-    def predict_proba(self,x_test: pd.Series, batch_size: int = 16):
-        x_test,_ = build_features("use",x_test,x_test,model=load_feature_extractor("use"))
+    def predict_proba(self,x_test, batch_size: int = 16):
+        if isinstance(x_test, pd.Series):
+            x_test,_ = build_features(self.feature_extractor,x_test,x_test,model=load_feature_extractor(self.feature_extractor))
         probas = self.clf.predict(x_test, batch_size=batch_size)
         return probas
     
