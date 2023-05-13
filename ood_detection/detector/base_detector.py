@@ -39,9 +39,9 @@ class BaseDetector:
         precision, f05, f15, recall, mcc = [], [], [], [], []
         for probas_threshold in thresholds:
             if self.indomain_is_higher:
-                pred = [True if conf > probas_threshold else 0 for conf in confs]
+                pred = [True if conf > probas_threshold else False for conf in confs]
             else:
-                pred = [True if conf < probas_threshold else 0 for conf in confs]
+                pred = [True if conf < probas_threshold else False for conf in confs]
             
             precision.append(precision_score(df_val.is_indomain, pred))
             f05.append(fbeta_score(df_val.is_indomain, pred, beta=0.5))
