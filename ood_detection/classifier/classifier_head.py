@@ -118,6 +118,8 @@ class MLP:
 
         self.clf = clf
         self.trained_classes_mapping = list(self.label_encoder.classes_)
+        self.x_train = x_train
+        self.y_train = y_train
 
     def predict(self,x_test, batch_size: int = 16):
         if isinstance(x_test, pd.Series):
@@ -126,6 +128,13 @@ class MLP:
         pred_ids = np.argmax(probas,axis=1)
         test_pred = [self.trained_classes_mapping[pred_id] for pred_id in pred_ids]
         return test_pred
+    
+    def predict_ids(self,x_test, batch_size: int = 16):
+        if isinstance(x_test, pd.Series):
+            x_test,_ = build_features(self.feature_extractor,x_test,x_test,model=load_feature_extractor(self.feature_extractor))
+        probas = self.clf.predict(x_test, batch_size=batch_size)
+        pred_ids = np.argmax(probas,axis=1)
+        return pred_ids
     
     def predict_proba(self,x_test, batch_size: int = 16):
         if isinstance(x_test, pd.Series):

@@ -1,3 +1,96 @@
+import pandas as pd
+import numpy as np
+from ood_detection.classifier.train import train_classifier
+from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
+from sklearn.metrics import fbeta_score, matthews_corrcoef, precision_score, recall_score
+import plotly.express as px
+import plotly.io as pio
+
+class TrustScores():
+    def __init__(self,feature_extractor: str) -> None:
+        self.feature_extractor = feature_extractor
+
+    def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
+        # Fit Classifier
+        model_name = "mlp" if not use_best_ckpt else "mlp_best_ckpt"
+        clf = train_classifier(df, model_name, self.feature_extractor, skip_cv = True)
+
+        # Initialize trust score.
+        trust_model = TrustScore()
+        trust_model.fit(clf.x_train, np.array([clf.trained_classes_mapping.index(x) for x in df['intent'].to_list()]))
+
+        self.trust_model = trust_model
+        self.clf = clf
+
+    def predict(self,df_test: pd.DataFrame, return_cls_pred: bool = False):
+        x_test,_ = build_features(self.feature_extractor,
+                                  df_test['text'],df_test['text'],
+                                  model=load_feature_extractor(self.feature_extractor))
+        pred_ids = self.clf.predict_ids(x_test)
+        if return_cls_pred:
+            test_pred = [self.clf.trained_classes_mapping[pred_id] for pred_id in pred_ids]
+
+        # Compute trusts score, given (unlabeled) testing examples and (hard) model predictions.
+        trust_score = self.trust_model.get_score(x_test, pred_ids)
+
+        if return_cls_pred:
+            return trust_score,test_pred
+        else:
+            return trust_score
+    
+    def tune_threshold(self, df_val: pd.DataFrame,
+                        indomain_classes: list,
+                        thresholds = np.linspace(0,5,100)):
+        if 'intent' not in df_val.columns:
+            print("column 'intent' is missing in df_val. Make sure to change your target variable name as 'intent")
+            return
+        
+        if len(indomain_classes)==0:
+            print("found empty indomain_classes. Make sure to specify all indomain classes inside a list.")
+            return
+        
+        df_val['is_indomain'] = df_val['intent'].apply(lambda x: x in indomain_classes)
+
+        #Get Trust Score
+        trust_score = self.predict(df_val)
+
+        # Init visualization data
+        df_viz = df_val.copy()
+        df_viz['trust_score'] = trust_score
+        df_viz['trust_score'] = df_viz['trust_score'].astype(float)
+
+        # Check metric value for each threshold value
+        confs = df_viz['trust_score'].to_list()
+        precision, f05, f15, recall, mcc = [], [], [], [], []
+        for probas_threshold in thresholds:
+            pred = [True if conf > probas_threshold else 0 for conf in confs]
+            
+            precision.append(precision_score(df_val.is_indomain, pred))
+            f05.append(fbeta_score(df_val.is_indomain, pred, beta=0.5))
+            f15.append(fbeta_score(df_val.is_indomain, pred, beta=1.5))
+            recall.append(recall_score(df_val.is_indomain, pred))
+            mcc.append(matthews_corrcoef(df_val.is_indomain, pred))
+
+        df_viz = pd.DataFrame({
+            'Precision': precision,
+            'F0.5 Score': f05,
+            'MCC': mcc,
+            'F1.5 Score': f15,
+            'Recall': recall,
+        }, index=thresholds)
+        df_viz.index.name = "Thresholds"
+        df_viz.columns.name = "Rate"
+
+        fig_thresh = px.line(
+            df_viz, title='Precision, F0.5, MCC, F1.5, Recall at every threshold',
+            width=1000, height=500
+        )
+
+        fig_thresh.update_yaxes(range=[-0.5, 1.1], constrain='domain')
+        fig_thresh.show()
+
+
+
 #Reference: https://github.com/google/TrustScore/blob/master/trustscore/trustscore.py
 
 # Copyright 2018 Google LLC
