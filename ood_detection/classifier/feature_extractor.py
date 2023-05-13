@@ -9,19 +9,15 @@ def build_features(feature_extractor: str,
                    text_train: pd.Series, intent_train: pd.Series,
                    text_val: pd.Series = None, 
                    text_val_ckpt: pd.Series = None, intent_val_ckpt: pd.Series = None,
-                   return_vec: bool = False,
-                   model = None,
-                   lowercase: bool = True,
+                   model = None, lowercase: bool = True,
                    **kwargs,
                   ):
     if feature_extractor == "bow":
         output = build_bow(text_train,intent_train,text_val,
-                           lowercase=lowercase,return_vec=return_vec,
-                           **kwargs)
+                           lowercase=lowercase,**kwargs)
     elif feature_extractor == "tf_idf":
         output = build_tfidf(text_train,intent_train,text_val,
-                             lowercase=lowercase,return_vec=return_vec,
-                             **kwargs)
+                             lowercase=lowercase,**kwargs)
     elif feature_extractor == "use":
         output = build_use(model,text_train,intent_train,text_val)
     elif feature_extractor == "use_best_ckpt":
@@ -72,7 +68,7 @@ def load_model(name: str):
 
 
 def build_bow(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series,
-              lowercase: bool, return_vec: bool = False, vectorizer = None,
+              lowercase: bool, vectorizer = None,
               **kwargs) -> pd.DataFrame:
     if vectorizer is None:
         vectorizer = CountVectorizer(lowercase=lowercase,**kwargs)
@@ -83,21 +79,15 @@ def build_bow(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series
     df_train_bow = pd.DataFrame(X_train,columns=vectorizer.get_feature_names_out())
 
     if val_corpus is None:
-        if not return_vec:
-            return df_train_bow, y_train
-        else:
-            return df_train_bow, y_train, vectorizer
+        return df_train_bow, y_train
     else:
         X_val = vectorizer.transform(val_corpus.to_list())
         df_val_bow = pd.DataFrame(X_val.toarray(),columns=vectorizer.get_feature_names_out())
-        if not return_vec:
-            return df_train_bow, y_train, df_val_bow
-        else:
-            return df_train_bow, y_train, df_val_bow, vectorizer
+        return df_train_bow, y_train, df_val_bow
     
 
 def build_tfidf(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series,
-                lowercase: bool, return_vec: bool = False, vectorizer = None,
+                lowercase: bool, vectorizer = None,
                 **kwargs) -> pd.DataFrame:
     if vectorizer is None:
         vectorizer = TfidfVectorizer(lowercase=lowercase,**kwargs)
@@ -108,17 +98,11 @@ def build_tfidf(train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Seri
     df_train_tfidf = pd.DataFrame(X_train,columns=vectorizer.get_feature_names_out())
 
     if val_corpus is None:
-        if not return_vec:
-            return df_train_tfidf, y_train
-        else:
-            return df_train_tfidf, y_train, vectorizer
+        return df_train_tfidf, y_train
     else:
         X_val = vectorizer.transform(val_corpus.to_list())
         df_val_tfidf = pd.DataFrame(X_val.toarray(),columns=vectorizer.get_feature_names_out())
-        if not return_vec:
-            return df_train_tfidf, y_train, df_val_tfidf
-        else:
-            return df_train_tfidf, y_train, df_val_tfidf, vectorizer
+        return df_train_tfidf, y_train, df_val_tfidf
 
 
 def build_use(model,train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series) -> np.array:

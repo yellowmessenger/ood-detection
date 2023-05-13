@@ -104,8 +104,7 @@ def hpo_create_optimizer(trial):
     return optimizer
 
 
-def hpo_objective(trial, df: pd.DataFrame, feature_extractor: str = "xlm", 
-                  gibberish_list: list = None):
+def hpo_objective(trial, df: pd.DataFrame, feature_extractor: str = "xlm"):
     cv_scores = []
     n_splits = 5
     top_n = 1
@@ -126,7 +125,7 @@ def hpo_objective(trial, df: pd.DataFrame, feature_extractor: str = "xlm",
         
         # Generate Features
         output = build_features(feature_extractor, df_train["text"], df_train["intent"],df_val["text"], 
-                               None,None,return_vec=False,gibberish_list=gibberish_list,model=feature_model)
+                               None,None,return_vec=False,model=feature_model)
         if "_mha" not in feature_extractor:
             X_train, y_train, X_val = output
         else:

@@ -28,7 +28,10 @@ creds.js
 *.tsv
 *.tsv.gz
 *.xlsx
+*.hdf5
 
+# Private Folder
+tmp_logs/
 
 # Mac/OSX
 .DS_Store

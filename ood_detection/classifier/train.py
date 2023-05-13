@@ -7,9 +7,10 @@ import optuna
 from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
 
 
-def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: list = None,
-             return_metric: bool = False, df_val_ckpt: pd.DataFrame = None, n_splits: int = 5, skip_cv: bool = False,
-             **kwargs):
+def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
+                    return_metric: bool = False, df_val_ckpt: pd.DataFrame = None, 
+                    n_splits: int = 5, skip_cv: bool = False,
+                    **kwargs):
     if "text" not in df.columns:
         print("'text' should exist in the dataframe columns")
         return
@@ -28,6 +29,13 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
     if "_best_ckpt" in feature_extractor and df_val_ckpt is None:
         print("df_val_ckpt is None but using '_best_ckpt' in feature_extractor. Make sure to pass validation data in the df_val_ckpt arguments")
         return 
+    
+    if "_best_ckpt" in feature_extractor and "_best_ckpt" not in model:
+        print(f"_best_ckpt is found in 'feature_extractor' but not found in 'model'. Make sure to use the correct model name: {model}_best_ckpt")
+        return
+    elif "_best_ckpt" not in feature_extractor and "_best_ckpt" in model:
+        print(f"_best_ckpt is found in 'model' but not found in 'feature_extractor'. Make sure to use the correct feature_extractor name: {feature_extractor}_best_ckpt")
+        return
 
     cv_scores_dict = {"precision":[],"recall":[],"f1-score":[],"mcc":[],"support":[]}
     
@@ -44,8 +52,6 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
                                    df_val["text"], 
                                    df_val_ckpt["text"] if df_val_ckpt is not None else None,
                                    df_val_ckpt["intent"] if df_val_ckpt is not None else None,
-                                   return_vec=False,
-                                   gibberish_list=gibberish_list,
                                    model=feature_model,
                                    **kwargs)
 
@@ -73,7 +79,7 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
                 clf = fit_mlp(feature_extractor,X_train,y_train,**kwargs)
             elif model == "mlp_best_ckpt":   
                 from ood_detection.classifier.train_utils import fit_mlp         
-                clf = fit_mlp(feature_extractor.X_train,y_train,X_val_ckpt, y_val_ckpt,**kwargs)
+                clf = fit_mlp(feature_extractor,X_train,y_train,X_val_ckpt, y_val_ckpt,**kwargs)
             else:
                 print("Model's not supported.")
                 return
@@ -101,13 +107,10 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
         
     
     # Generate Features from Full Data
-    return_vec = True if feature_extractor in ["bow","tf_idf"] else False
     output = build_features(feature_extractor, df["text"], df["intent"],
                            None, 
                            df_val_ckpt["text"] if df_val_ckpt is not None else None,
                            df_val_ckpt["intent"] if df_val_ckpt is not None else None,
-                           return_vec=return_vec,
-                           gibberish_list=gibberish_list,
                            model=feature_model,
                            **kwargs)
     
@@ -115,11 +118,7 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
         output, output_ckpt = output
         X_val_ckpt, y_val_ckpt = output_ckpt
 
-    if return_vec:
-        X_full,y_full,vec = output
-    else:
-        X_full,y_full = output
-        
+    X_full,y_full = output
     
     #Train on full data
     if model == "gaussian_nb":
@@ -140,35 +139,18 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
             clf_full = fit_mlp(feature_extractor,X_full,y_full,**kwargs)
         elif model == "mlp_best_ckpt":            
             clf_full = fit_mlp(feature_extractor,X_full,y_full,X_val_ckpt, y_val_ckpt,**kwargs)
-            
-        if not return_metric:
-            if feature_extractor in ["bow","tf_idf"]:
-                return clf_full,vec
-            else:
-                return clf_full
-        else:
-            if feature_extractor in ["bow","tf_idf"]:
-                return clf_full,output_metric_dict,vec
-            else:
-                return clf_full,output_metric_dict
     else:
         print("Model's not supported.")
         return
 
     if not return_metric:
-        if feature_extractor in ["bow","tf_idf"]:
-            return clf_full, vec
-        else:
-            return clf_full
+        return clf_full
     else:
-        if feature_extractor in ["bow","tf_idf"]:
-            return clf_full,output_metric_dict,vec
-        else:
-            return clf_full,output_metric_dict
+        return clf_full,output_metric_dict
 
 
 def hpo(df,num_trials=200,feature_extractor="xlm",
-        sampler="random",gibberish_list=None):
+        sampler="random"):
     from ood_detection.classifier.train_utils import hpo_objective
 
     if sampler == "random":
@@ -183,8 +165,7 @@ def hpo(df,num_trials=200,feature_extractor="xlm",
                                    )
     else:
         print("Sampler's not supported. Supported sampler are: random & tpe")
-    study.optimize(lambda trial: hpo_objective(trial, df, feature_extractor, 
-                                               gibberish_list), 
+    study.optimize(lambda trial: hpo_objective(trial, df, feature_extractor), 
                    n_trials=num_trials)
     
     pruned_trials = study.get_trials(deepcopy=False, states=[optuna.trial.TrialState.PRUNED])
