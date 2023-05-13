@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import tensorflow_hub as hub
 import gc
 
@@ -37,7 +36,9 @@ def build_features(feature_extractor: str,
         return output, output_ckpt
 
 def load_feature_extractor(feature_extractor:str):
-    if feature_extractor == "use":
+    if feature_extractor in ['bow','tf_idf']:
+        return
+    elif feature_extractor in ["use","use_best_ckpt"]:
         return load_model("use")
     elif feature_extractor in ["xlm","xlm_best_ckpt","xlm_mha"]:
         return load_model("tf_xlm")

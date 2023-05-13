@@ -10,7 +10,7 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard
 from tensorflow.keras.optimizers import Adam
 from sklearn.utils.class_weight import compute_class_weight
-from classifier.feature_extractor import load_feature_extractor, build_features
+from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
 
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.svm import SVC

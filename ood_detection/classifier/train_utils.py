@@ -11,9 +11,9 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.backend import clear_session
 
-from classifier.feature_extractor import load_feature_extractor, build_features
-from classifier.classifier_head import GaussianNB, MultinomialNB, SVC, RandomForestClassifier, MLP
-from classifier.classifier_head import compute_logarithmic_class_weights
+from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
+from ood_detection.classifier.classifier_head import GaussianNB, MultinomialNB, SVC, RandomForestClassifier, MLP
+from ood_detection.classifier.classifier_head import compute_logarithmic_class_weights
 
 def fit_nb(X: pd.DataFrame, y: pd.Series, nb_type: str = "gaussian"):
     if nb_type == "gaussian":

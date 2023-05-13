@@ -4,7 +4,7 @@ from tqdm import tqdm
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import classification_report,matthews_corrcoef
 import optuna
-from classifier.feature_extractor import load_feature_extractor, build_features
+from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
 
 
 def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: list = None,
@@ -24,6 +24,10 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
         if "intent" not in df_val_ckpt.columns:
             print("'intent' should exist in the validation dataframe columns")
             return
+        
+    if "_best_ckpt" in feature_extractor and df_val_ckpt is None:
+        print("df_val_ckpt is None but using '_best_ckpt' in feature_extractor. Make sure to pass validation data in the df_val_ckpt arguments")
+        return 
 
     cv_scores_dict = {"precision":[],"recall":[],"f1-score":[],"mcc":[],"support":[]}
     
@@ -53,22 +57,22 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
 
             # Train Model
             if model == "gaussian_nb":
-                from classifier.train_utils import fit_nb
+                from ood_detection.classifier.train_utils import fit_nb
                 clf = fit_nb(X_train,y_train,nb_type = "gaussian")
             elif model == "multinomial_nb":
-                from classifier.train_utils import fit_nb
+                from ood_detection.classifier.train_utils import fit_nb
                 clf = fit_nb(X_train,y_train,nb_type = "multinomial")
             elif model == "svc":
-                from classifier.train_utils import fit_svc
+                from ood_detection.classifier.train_utils import fit_svc
                 clf = fit_svc(X_train,y_train)
             elif model == "rf":
-                from classifier.train_utils import fit_rf
+                from ood_detection.classifier.train_utils import fit_rf
                 clf = fit_rf(X_train,y_train)
             elif model == "nn": 
-                from classifier.train_utils import fit_nn           
+                from ood_detection.classifier.train_utils import fit_nn           
                 clf,trained_intents_map = fit_nn(X_train,y_train,**kwargs)
             elif model == "nn_best_ckpt":   
-                from classifier.train_utils import fit_nn         
+                from ood_detection.classifier.train_utils import fit_nn         
                 clf,trained_intents_map = fit_nn(X_train,y_train,X_val_ckpt, y_val_ckpt,**kwargs)
             else:
                 print("Model's not supported.")
@@ -125,19 +129,19 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
     
     #Train on full data
     if model == "gaussian_nb":
-        from classifier.train_utils import fit_nb
+        from ood_detection.classifier.train_utils import fit_nb
         clf_full = fit_nb(X_full,y_full,nb_type = "gaussian")
     elif model == "multinomial_nb":
-        from classifier.train_utils import fit_nb
+        from ood_detection.classifier.train_utils import fit_nb
         clf_full = fit_nb(X_full,y_full,nb_type = "multinomial")
     elif model == "svc":
-        from classifier.train_utils import fit_svc
+        from ood_detection.classifier.train_utils import fit_svc
         clf_full = fit_svc(X_full,y_full)
     elif model == "rf":
-        from classifier.train_utils import fit_rf
+        from ood_detection.classifier.train_utils import fit_rf
         clf_full = fit_rf(X_full,y_full)
     elif model in ["nn","nn_best_ckpt"]:
-        from classifier.train_utils import fit_nn
+        from ood_detection.classifier.train_utils import fit_nn
         if model == "nn":
             clf_full,trained_intents_map = fit_nn(X_full,y_full,**kwargs)
         elif model == "nn_best_ckpt":            
@@ -171,7 +175,7 @@ def train(df: pd.DataFrame, model: str, feature_extractor: str, gibberish_list: 
 
 def hpo(df,num_trials=200,feature_extractor="xlm",
         sampler="random",gibberish_list=None):
-    from classifier.train_utils import hpo_objective
+    from ood_detection.classifier.train_utils import hpo_objective
 
     if sampler == "random":
         study = optuna.create_study(direction="maximize",
