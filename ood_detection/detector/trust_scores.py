@@ -9,7 +9,9 @@ class TrustScores(BaseDetector):
         BaseDetector.__init__(self) 
         self.feature_extractor = feature_extractor
 
-        #the higher the score, the more likely it's indomain
+        # This parameter will be used to decide the prediction class
+        # If True, the higher the score, the more likely it's indomain
+        # Else, the lower the score, the more likely it's indomain
         self.indomain_is_higher = True 
 
     def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
@@ -24,22 +26,16 @@ class TrustScores(BaseDetector):
         self.trust_model = trust_model
         self.clf = clf
 
-    def predict(self,df_test: pd.DataFrame, return_cls_pred: bool = False):
+    def predict_score(self,df_test: pd.DataFrame):
         x_test,_ = build_features(self.feature_extractor,
                                   df_test['text'],df_test['text'],
                                   model=load_feature_extractor(self.feature_extractor))
         pred_ids = self.clf.predict_ids(x_test)
-        if return_cls_pred:
-            test_pred = [self.clf.trained_classes_mapping[pred_id] for pred_id in pred_ids]
 
         # Compute trusts score, given (unlabeled) testing examples and (hard) model predictions.
         trust_score = self.trust_model.get_score(x_test, pred_ids)
 
-        if return_cls_pred:
-            return trust_score,test_pred
-        else:
-            return trust_score
-
+        return trust_score
 
 
 #Reference: https://github.com/google/TrustScore/blob/master/trustscore/trustscore.py

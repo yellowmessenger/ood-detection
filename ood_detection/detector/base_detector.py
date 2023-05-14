@@ -10,8 +10,40 @@ class BaseDetector:
     def fit(self):
         pass
 
-    def predict(self):
+    def predict(self,df_test: pd.DataFrame, threshold: float):
+        scores = self.predict_score(df_test)
+
+        if self.indomain_is_higher:
+            pred = [True if conf > threshold else False for conf in scores]
+        else:
+            pred = [True if conf < threshold else False for conf in scores]
+
+        return pred
+
+    def predict_score(self):
         pass
+
+    def benchmark(self,df_test: pd.DataFrame, indomain_classes: list,
+                  threshold: float):
+        if 'intent' not in df_test.columns:
+            print("column 'intent' is missing in df_val. Make sure to change your target variable name as 'intent")
+            return
+        
+        if len(indomain_classes)==0:
+            print("found empty indomain_classes. Make sure to specify all indomain classes inside a list.")
+            return
+        
+        df_test['is_indomain'] = df_test['intent'].apply(lambda x: x in indomain_classes)
+        pred = self.predict(df_test,threshold)
+
+        benchmark_dict = {}
+        benchmark_dict['precision'] = precision_score(df_test.is_indomain, pred)
+        benchmark_dict['f05'] = fbeta_score(df_test.is_indomain, pred, beta=0.5)
+        benchmark_dict['f15'] = fbeta_score(df_test.is_indomain, pred, beta=1.5)
+        benchmark_dict['recall'] = recall_score(df_test.is_indomain, pred)
+        benchmark_dict['mcc'] = matthews_corrcoef(df_test.is_indomain, pred)
+
+        return benchmark_dict
 
     def tune_threshold(self, df_val: pd.DataFrame,
                         indomain_classes: list,
@@ -26,22 +58,19 @@ class BaseDetector:
         
         df_val['is_indomain'] = df_val['intent'].apply(lambda x: x in indomain_classes)
 
-        #Get Score
-        score = self.predict(df_val)
-
         # Init visualization data
         df_viz = df_val.copy()
-        df_viz['score'] = score
-        df_viz['score'] = df_viz['score'].astype(float)
+        df_viz['scores'] = self.predict_score(df_val)
+        df_viz['scores'] = df_viz['scores'].astype(float)
 
         # Check metric value for each threshold value
-        confs = df_viz['score'].to_list()
+        scores = df_viz['scores'].to_list()
         precision, f05, f15, recall, mcc = [], [], [], [], []
-        for probas_threshold in thresholds:
+        for score_threshold in thresholds:
             if self.indomain_is_higher:
-                pred = [True if conf > probas_threshold else False for conf in confs]
+                pred = [True if conf > score_threshold else False for conf in scores]
             else:
-                pred = [True if conf < probas_threshold else False for conf in confs]
+                pred = [True if conf < score_threshold else False for conf in scores]
             
             precision.append(precision_score(df_val.is_indomain, pred))
             f05.append(fbeta_score(df_val.is_indomain, pred, beta=0.5))
