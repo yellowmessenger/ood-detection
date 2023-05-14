@@ -10,9 +10,9 @@ class TrustScores(BaseDetector):
         self.feature_extractor = feature_extractor
 
         # This parameter will be used to decide the prediction class
-        # If True, the higher the score, the more likely it's indomain
-        # Else, the lower the score, the more likely it's indomain
-        self.indomain_is_higher = True 
+        # If True, the lower the score, the more likely it's outdomain
+        # Else, the higher the score, the more likely it's outdomain
+        self.outdomain_is_lower = False 
 
     def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
         # Fit Classifier
