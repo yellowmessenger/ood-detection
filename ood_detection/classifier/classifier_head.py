@@ -18,12 +18,15 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 class MLP:
-    def __init__(self,feature_extractor: str):
+    def __init__(self,feature_extractor: str, use_multi_label: bool = False):
         self.feature_extractor = feature_extractor
+        self.use_multi_label = use_multi_label
 
     def fit(self,x_train: np.array, y: pd.Series,
             x_val: np.array = None, y_val: pd.Series = None,
             **kwargs):
+        
+        print(f"Fitting MLP with {'multi-label' if self.use_multi_label else 'multi-class'} fashion.")
         
         if x_val is not None and y_val is not None:
             x_train,y_train,x_val,y_val = self.prepare_input(x_train,y,x_val,y_val)
@@ -55,7 +58,7 @@ class MLP:
             
         clf.add(
             Dense(y_train.shape[1], 
-                activation="softmax",\
+                activation="sigmoid" if self.use_multi_label else "softmax",\
                 )
         )
 
@@ -94,7 +97,8 @@ class MLP:
                             )
             callbacks.append(logs)
         
-        clf.compile(loss='categorical_crossentropy', optimizer=adam)
+        clf.compile(loss='binary_crossentropy' if self.use_multi_label else 'categorical_crossentropy', 
+                    optimizer=adam)
         history = clf.fit(x_train, y_train,
                       epochs=kwargs.get("epoch",25), 
                       batch_size=32, 

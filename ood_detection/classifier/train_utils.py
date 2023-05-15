@@ -42,7 +42,7 @@ def fit_rf(X: pd.DataFrame, y: pd.Series):
 def fit_mlp(feature_extractor: str, x_train: np.array, y: pd.Series, 
             x_val: np.array = None, y_val: pd.Series = None,
             **kwargs):
-    clf = MLP(feature_extractor)
+    clf = MLP(feature_extractor,use_multi_label=kwargs.get("use_multi_label", False))
     clf.fit(x_train,y,x_val,y_val,**kwargs)
     return clf
 
