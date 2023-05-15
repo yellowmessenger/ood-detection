@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 import numpy.linalg as LA
 import math
+from ood_detection.classifier.train import train_classifier
 from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
 from ood_detection.detector.base import BaseDetector
 from sklearn.metrics import fbeta_score,matthews_corrcoef
@@ -10,18 +11,23 @@ from sklearn.metrics import fbeta_score,matthews_corrcoef
 class ADB(BaseDetector):
     def __init__(self,feature_extractor: str,
                  ood_label: str,
-                 alpha: float = 1.0, step_size:float = 0.01) -> None:
+                 alpha: float = 0.75, step_size:float = 0.01) -> None:
         BaseDetector.__init__(self) 
         self.feature_extractor = feature_extractor
         self.alpha = alpha
         self.step_size = step_size
         self.ood_label = ood_label
 
-    def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
+    def fit(self,df: pd.DataFrame):
+        # Fit Classifier
+        model_name = "adb"
+        self.clf = train_classifier(df, model_name, self.feature_extractor, skip_cv = True)
+
         # Generate Embeddings
         x_train,y_train= build_features(self.feature_extractor,
                                   df['text'],df['intent'],
                                   model=load_feature_extractor(self.feature_extractor))
+        x_train,y_train = self.clf.get_embedding(x_train,y_train)
         
         x_train = tf.math.l2_normalize(x_train, axis=1)  # normalize to make sure it lies on a unit n-sphere
         self.centroids = compute_centroids(x_train, y_train)
@@ -32,6 +38,7 @@ class ADB(BaseDetector):
         x_test,_ = build_features(self.feature_extractor,
                                   df_test['text'],df_test['text'],
                                   model=load_feature_extractor(self.feature_extractor))
+        x_test = self.clf.get_embedding(x_test)
         
         x_test = tf.math.l2_normalize(x_test, axis=1)
         logits = distance_metric(x_test, self.centroids, 'euclidean')

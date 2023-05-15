@@ -80,6 +80,9 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
             elif model == "mlp_best_ckpt":   
                 from ood_detection.classifier.train_utils import fit_mlp         
                 clf = fit_mlp(feature_extractor,X_train,y_train,X_val_ckpt, y_val_ckpt,**kwargs)
+            elif model == "adb": 
+                from ood_detection.classifier.train_utils import fit_adb       
+                clf = fit_adb(feature_extractor,X_train,y_train)
             else:
                 print("Model's not supported.")
                 return
@@ -139,6 +142,9 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
             clf_full = fit_mlp(feature_extractor,X_full,y_full,**kwargs)
         elif model == "mlp_best_ckpt":            
             clf_full = fit_mlp(feature_extractor,X_full,y_full,X_val_ckpt, y_val_ckpt,**kwargs)
+    elif model == "adb": 
+        from ood_detection.classifier.train_utils import fit_adb       
+        clf_full = fit_adb(feature_extractor,X_full,y_full)
     else:
         print("Model's not supported.")
         return

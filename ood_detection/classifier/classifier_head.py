@@ -6,9 +6,11 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder,OneHotEncoder
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import Dense, Dropout, Input
 from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.activations import relu
+import tensorflow_addons as tfa
 from sklearn.utils.class_weight import compute_class_weight
 from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
 
@@ -190,3 +192,86 @@ def create_class_weight(labels_dict, mu, minv):
         class_weight[key] = score if score > minv else minv
     
     return class_weight
+
+class ADBModel:
+    def __init__(self,feature_extractor: str):
+        self.feature_extractor = feature_extractor
+
+    def fit(self,x_train: np.array, y: pd.Series,
+            x_val: np.array = None, y_val: pd.Series = None):
+        
+        # Prepare Input
+        intents_dct = {}
+        y_train = y.to_list()
+        new_key_value = 0
+        for label in y_train:
+            if label not in intents_dct.keys():
+                intents_dct[label] = new_key_value
+                new_key_value += 1
+
+        x_train = tf.convert_to_tensor(x_train, dtype='float32')
+        y_train = [intents_dct[label] for label in y_train]
+        y_train = tf.convert_to_tensor(y_train, dtype='int32')
+        self.intents_dct = intents_dct
+
+        emb_dim = x_train.shape[1]
+        clf = ADBPretrainTripletLossModel(emb_dim)
+        loss = tfa.losses.TripletSemiHardLoss()
+        shuffle = True  # shuffle before every epoch in order to guarantee diversity in pos and neg samples
+        batch_size = 300  # same as above - to guarantee...
+
+        clf.compile(optimizer=Adam(learning_rate=1e-4), loss=loss)
+        clf.fit(x_train, y_train, epochs=20, shuffle=shuffle, batch_size=batch_size)
+
+        self.clf = clf
+
+    def get_embedding(self,x_test, y_test = None, batch_size: int = 16):
+        if isinstance(x_test, pd.Series):
+            x_test,y_test = build_features(self.feature_extractor,x_test,y_test,model=load_feature_extractor(self.feature_extractor))
+        
+        #Prepare input
+        x_test = tf.convert_to_tensor(x_test, dtype='float32')
+        if y_test is not None:
+            y_test = [self.intents_dct[label] for label in y_test]
+            y_test = tf.convert_to_tensor(y_test, dtype='int32')
+
+        embeddings_lst = []
+        for batch in batches(x_test, batch_size):  # iterate in batches of size 32
+            temp_emb = self.clf(batch)
+            embeddings_lst.append(temp_emb)
+
+        embeddings = tf.concat(embeddings_lst, axis=0)
+        if y_test is not None:
+            return embeddings,y_test
+        else:
+            return embeddings
+
+
+class ADBPretrainTripletLossModel(tf.keras.Model):
+    """Adaptive Decision Boundary with Triplet Loss pre-training model using USE or SBERT embeddings."""
+
+    def __init__(self, emb_dim):
+        super(ADBPretrainTripletLossModel, self).__init__()
+        self.inp = Input(shape=(emb_dim))
+        self.dense = Dense(emb_dim, activation=relu)
+        self.dropout = Dropout(0.1)
+        self.dense2 = Dense(emb_dim, activation=relu)
+        self.dense3 = Dense(emb_dim, activation=relu)
+        self.dense4 = Dense(emb_dim, activation=None)
+
+    def call(self, inputs, training=None):
+        x = self.dense(inputs)
+        x = self.dropout(x)
+        x = self.dense2(x)
+        x = self.dropout(x)
+        x = self.dense3(x)
+
+        if training:
+            x = self.dropout(x)
+            x = self.dense4(x)
+
+        return tf.nn.l2_normalize(x, axis=1)
+    
+def batches(lst, batch_size):
+    for i in range(0, len(lst), batch_size):
+        yield lst[i:i + batch_size]
