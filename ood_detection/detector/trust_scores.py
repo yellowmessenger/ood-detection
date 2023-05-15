@@ -16,7 +16,7 @@ class TrustScores(BaseDetector):
 
     def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
         # Fit Classifier
-        model_name = "mlp" if not use_best_ckpt else "mlp_best_ckpt"
+        model_name = "mlp_best_ckpt" if use_best_ckpt else "mlp"
         clf = train_classifier(df, model_name, self.feature_extractor, skip_cv = True)
 
         # Initialize trust score.

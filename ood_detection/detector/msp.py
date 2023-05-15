@@ -4,17 +4,30 @@ from ood_detection.classifier.train import train_classifier
 from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
 from ood_detection.detector.base import BaseDetector
 
-class Entropy(BaseDetector):
-    def __init__(self,feature_extractor: str) -> None:
+class MSP(BaseDetector):
+    def __init__(self,feature_extractor: str, is_ood_label_in_train: bool, 
+                 ood_label: str = None) -> None:
         BaseDetector.__init__(self) 
         self.feature_extractor = feature_extractor
+
+        # This parameter will be used during inference
+        # to know which probability score should be used
+        self.is_ood_label_in_train = is_ood_label_in_train
+        self.ood_label = ood_label
+
+        if is_ood_label_in_train and ood_label is None:
+            print("is_ood_label_in_train is set to True but ood_label is None. Make sure to give the value of ood_label column name.")
+            return 
 
         # This parameter will be used to decide the prediction class
         # If True, the lower the score, the more likely it's outdomain
         # Else, the higher the score, the more likely it's outdomain
-        self.outdomain_is_lower = False 
-
-    def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
+        if is_ood_label_in_train:
+            self.outdomain_is_lower = False 
+        else:
+            self.outdomain_is_lower = True     
+        
+    def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):        
         # Fit Classifier
         model_name = "mlp_best_ckpt" if use_best_ckpt else "mlp"
         clf = train_classifier(df, model_name, self.feature_extractor, skip_cv = True)
@@ -27,11 +40,9 @@ class Entropy(BaseDetector):
                                   model=load_feature_extractor(self.feature_extractor))
         probas = self.clf.predict_proba(x_test)
 
-        # Compute entropy score
-        entropy_score = calc_entropy(probas)
+        if self.is_ood_label_in_train:
+            probas = probas[:,self.clf.trained_classes_mapping.index(self.ood_label)] #get out-domain class probas
+        else:
+            probas = np.max(probas,axis=1)
 
-        return entropy_score
-
-
-def calc_entropy(probas):
-  return np.sum(probas * np.log(probas + 1e-6),axis=1) * -1
+        return probas
