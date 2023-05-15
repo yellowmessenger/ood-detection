@@ -44,9 +44,7 @@ class BaseDetector:
 
         return benchmark_dict
 
-    def tune_threshold(self, df_val: pd.DataFrame,
-                        indomain_classes: list,
-                        thresholds = np.linspace(0,5,100)):
+    def tune_threshold(self, df_val: pd.DataFrame, indomain_classes: list):
         if 'intent' not in df_val.columns:
             print("column 'intent' is missing in df_val. Make sure to change your target variable name as 'intent")
             return
@@ -64,6 +62,7 @@ class BaseDetector:
 
         # Check metric value for each threshold value
         scores = df_viz['scores'].to_list()
+        thresholds = np.linspace(df_viz['scores'].min() - 0.1,df_viz['scores'].max() + 0.1,100)
         precision, f05, f15, recall, mcc = [], [], [], [], []
         for score_threshold in thresholds:
             if self.outdomain_is_lower:

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from ood_detection.classifier.train import train_classifier
 from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
-from ood_detection.detector.base_detector import BaseDetector
+from ood_detection.detector.base import BaseDetector
 
 class TrustScores(BaseDetector):
     def __init__(self,feature_extractor: str) -> None:
@@ -12,7 +12,7 @@ class TrustScores(BaseDetector):
         # This parameter will be used to decide the prediction class
         # If True, the lower the score, the more likely it's outdomain
         # Else, the higher the score, the more likely it's outdomain
-        self.outdomain_is_lower = False 
+        self.outdomain_is_lower = True 
 
     def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
         # Fit Classifier

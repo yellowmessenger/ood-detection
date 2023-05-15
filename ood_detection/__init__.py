@@ -1,1 +1,2 @@
 from ood_detection.detector.trust_scores import TrustScores
+from ood_detection.detector.entropy import Entropy
