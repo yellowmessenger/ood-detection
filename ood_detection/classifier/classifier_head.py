@@ -11,6 +11,8 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, Tenso
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.activations import relu
 import tensorflow_addons as tfa
+import tensorflow_probability as tfp
+tfd = tfp.distributions
 from sklearn.utils.class_weight import compute_class_weight
 from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
 
@@ -101,6 +103,9 @@ class MLP:
         
         clf.compile(loss='binary_crossentropy' if self.use_multi_label else 'categorical_crossentropy', 
                     optimizer=adam)
+        
+        clf.summary()
+
         history = clf.fit(x_train, y_train,
                       epochs=kwargs.get("epoch",25), 
                       batch_size=32, 
@@ -275,3 +280,81 @@ class ADBPretrainTripletLossModel(tf.keras.Model):
 def batches(lst, batch_size):
     for i in range(0, len(lst), batch_size):
         yield lst[i:i + batch_size]
+
+
+class MLPDenseFlipout:
+    def __init__(self,feature_extractor: str):
+        self.feature_extractor = feature_extractor
+
+    def fit(self,x_train: np.array, y: pd.Series,**kwargs):
+
+        x_train,y_train = self.prepare_input(x_train,y)
+
+        bs = 256
+        no_cls = len(y.unique())
+        kl_divergence_function = (lambda q, p, _: tfd.kl_divergence(q, p) /  # pylint: disable=g-long-lambda
+                                                tf.cast(bs, dtype=tf.float32))
+
+        # Init model
+        clf = Sequential()
+        clf.add(tfp.layers.DenseFlipout(
+                                        x_train.shape[1], 
+                                        kernel_divergence_fn=kl_divergence_function,
+                                        activation=tf.nn.relu, 
+                                        input_shape=(x_train.shape[1],)
+                                        )
+                )
+        clf.add(tfp.layers.DenseFlipout(
+                                        no_cls, kernel_divergence_fn=kl_divergence_function,
+                                        activation=tf.nn.softmax
+                                        )
+                )
+
+        # Compile and fit model            
+        adam = Adam(learning_rate=kwargs.get("adam_learning_rate",1e-3))
+        
+        clf.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(), 
+                    optimizer=adam,
+                    experimental_run_tf_function=False,
+                    metrics=[tf.keras.metrics.SparseCategoricalCrossentropy(name='crossentropy'),
+                                tf.keras.metrics.SparseCategoricalAccuracy()])
+        
+        clf.summary()
+
+        history = clf.fit(x_train, y_train,
+                      epochs=kwargs.get("epoch",25), 
+                      batch_size=32, 
+                      shuffle=True, verbose=False) 
+
+        self.clf = clf
+        self.trained_classes_mapping = list(self.label_encoder.classes_)
+        self.x_train = x_train
+        self.y_train = y_train
+
+    def predict(self,x_test, batch_size: int = 16):
+        if isinstance(x_test, pd.Series):
+            x_test,_ = build_features(self.feature_extractor,x_test,x_test,model=load_feature_extractor(self.feature_extractor))
+        probas = self.clf.predict(x_test, batch_size=batch_size)
+        pred_ids = np.argmax(probas,axis=1)
+        test_pred = [self.trained_classes_mapping[pred_id] for pred_id in pred_ids]
+        return test_pred
+    
+    def predict_ids(self,x_test, batch_size: int = 16):
+        if isinstance(x_test, pd.Series):
+            x_test,_ = build_features(self.feature_extractor,x_test,x_test,model=load_feature_extractor(self.feature_extractor))
+        probas = self.clf.predict(x_test, batch_size=batch_size)
+        pred_ids = np.argmax(probas,axis=1)
+        return pred_ids
+    
+    def predict_proba(self,x_test, batch_size: int = 16):
+        if isinstance(x_test, pd.Series):
+            x_test,_ = build_features(self.feature_extractor,x_test,x_test,model=load_feature_extractor(self.feature_extractor))
+        probas = self.clf.predict(x_test, batch_size=batch_size)
+        return probas
+    
+    def prepare_input(self,x_train: np.array, y: pd.Series):
+        # Get y_train
+        self.label_encoder = LabelEncoder()
+        y_train = self.label_encoder.fit_transform(y.values)
+
+        return x_train,y_train

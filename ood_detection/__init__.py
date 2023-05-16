@@ -10,5 +10,6 @@ from ood_detection.detector.doc import DOC
 from ood_detection.detector.adb import ADB
 from ood_detection.detector.knn import KNN
 from ood_detection.detector.mc_dropout import MCDropout
+from ood_detection.detector.bnn_vi import BNNVI
 
 from ood_detection.dataloaders.base import DataLoader

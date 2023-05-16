@@ -83,6 +83,9 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
             elif model == "adb": 
                 from ood_detection.classifier.train_utils import fit_adb       
                 clf = fit_adb(feature_extractor,X_train,y_train)
+            elif model == "mlp_dense_flipout": 
+                from ood_detection.classifier.train_utils import fit_mlp_dense_flipout       
+                clf = fit_mlp_dense_flipout(feature_extractor,X_train,y_train)
             else:
                 print("Model's not supported.")
                 return
@@ -145,6 +148,9 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
     elif model == "adb": 
         from ood_detection.classifier.train_utils import fit_adb       
         clf_full = fit_adb(feature_extractor,X_full,y_full)
+    elif model == "mlp_dense_flipout": 
+        from ood_detection.classifier.train_utils import fit_mlp_dense_flipout       
+        clf_full = fit_mlp_dense_flipout(feature_extractor,X_full,y_full)
     else:
         print("Model's not supported.")
         return
