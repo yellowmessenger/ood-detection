@@ -12,7 +12,7 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.backend import clear_session
 
 from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
-from ood_detection.classifier.classifier_head import GaussianNB, MultinomialNB, SVC, RandomForestClassifier, MLP, ADBModel, MLPDenseFlipout
+from ood_detection.classifier.classifier_head import GaussianNB, MultinomialNB, SVC, RandomForestClassifier, MLP, ADBModel, MLPDenseFlipout, BiEncoder
 from ood_detection.classifier.classifier_head import compute_logarithmic_class_weights
 
 def fit_nb(X: pd.DataFrame, y: pd.Series, nb_type: str = "gaussian"):
@@ -57,6 +57,12 @@ def fit_adb(feature_extractor: str, x_train: np.array, y: pd.Series,
 def fit_mlp_dense_flipout(feature_extractor: str, x_train: np.array, y: pd.Series):
     clf = MLPDenseFlipout(feature_extractor)
     clf.fit(x_train,y)
+    return clf
+
+
+def fit_biencoder(feature_extractor: str, df_train: pd.DataFrame):
+    clf = BiEncoder(feature_extractor)
+    clf.fit(df_train)
     return clf
 
 

@@ -13,8 +13,11 @@ from tensorflow.keras.activations import relu
 import tensorflow_addons as tfa
 import tensorflow_probability as tfp
 tfd = tfp.distributions
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import InputExample, losses
+from torch.utils.data import DataLoader
 from sklearn.utils.class_weight import compute_class_weight
-from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features
+from ood_detection.classifier.feature_extractor import load_feature_extractor, build_features, load_model
 
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.svm import SVC
@@ -358,3 +361,46 @@ class MLPDenseFlipout:
         y_train = self.label_encoder.fit_transform(y.values)
 
         return x_train,y_train
+
+
+class BiEncoder:
+    def __init__(self,feature_extractor: str):
+        self.feature_extractor = feature_extractor
+
+        if self.feature_extractor not in ['mpnet']:
+            raise NotImplementedError("Currently only 'mpnet' is supported. You can add any new sentence-trasnformer model.")
+
+    def fit(self,df_train: pd.DataFrame):
+        
+        clf = load_model(self.feature_extractor)
+        train_examples = list(self.prepare_input(df_train))
+        
+        train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=16)
+        train_loss = losses.CosineSimilarityLoss(clf)
+        clf.fit(train_objectives=[(train_dataloader, train_loss)],
+                epochs=1, warmup_steps=10,
+                show_progress_bar=True)
+
+        self.clf = clf
+
+    def predict(self,queries: list, df_train: pd.DataFrame):
+        train_utterances, train_intents = df_train['text'].to_list(),df_train['intent'].to_list()
+        q_embeddings = self.clf.encode(queries)
+        train_embeddings = self.clf.encode(train_utterances)
+        sims = cosine_similarity(q_embeddings, train_embeddings)
+        pred_ids = np.argmax(sims, axis=1)
+        return [train_intents[i] for i in pred_ids]
+    
+    def predict_proba(self,queries: list, train_utterances: list):
+        q_embeddings = self.clf.encode(queries)
+        train_embeddings = self.clf.encode(train_utterances)
+        sims = cosine_similarity(q_embeddings, train_embeddings)
+        return np.max(sims, axis=1)
+    
+    def prepare_input(self,df: pd.DataFrame):
+        for i, row in df.iterrows():
+            currentSentence = row['text']
+            posSentence = df[df.intent==row['intent']].sample(1,random_state=i)['text'].iloc[0]
+            negSentence = df[df.intent!=row['intent']].sample(1,random_state=i)['text'].iloc[0]
+            yield InputExample(texts=[currentSentence, posSentence], label=1.0)
+            yield InputExample(texts=[currentSentence, negSentence], label=0.0)

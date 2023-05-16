@@ -47,19 +47,20 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
         for train_idx, val_idx in tqdm(skf.split(df,df["intent"])):
             df_train, df_val = df.iloc[train_idx], df.iloc[val_idx]
 
-            # Generate Features
-            output = build_features(feature_extractor, df_train["text"], df_train["intent"],
-                                   df_val["text"], 
-                                   df_val_ckpt["text"] if df_val_ckpt is not None else None,
-                                   df_val_ckpt["intent"] if df_val_ckpt is not None else None,
-                                   model=feature_model,
-                                   **kwargs)
+            if model not in ['biencoder']:
+                # Generate Features
+                output = build_features(feature_extractor, df_train["text"], df_train["intent"],
+                                    df_val["text"], 
+                                    df_val_ckpt["text"] if df_val_ckpt is not None else None,
+                                    df_val_ckpt["intent"] if df_val_ckpt is not None else None,
+                                    model=feature_model,
+                                    **kwargs)
 
-            if ("_best_ckpt" in feature_extractor) and (df_val_ckpt is not None):
-                output, output_ckpt = output
-                X_val_ckpt, y_val_ckpt = output_ckpt
+                if ("_best_ckpt" in feature_extractor) and (df_val_ckpt is not None):
+                    output, output_ckpt = output
+                    X_val_ckpt, y_val_ckpt = output_ckpt
 
-            X_train, y_train, X_val = output    
+                X_train, y_train, X_val = output    
 
             # Train Model
             if model == "gaussian_nb":
@@ -86,11 +87,17 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
             elif model == "mlp_dense_flipout": 
                 from ood_detection.classifier.train_utils import fit_mlp_dense_flipout       
                 clf = fit_mlp_dense_flipout(feature_extractor,X_train,y_train)
+            elif model == "biencoder": 
+                from ood_detection.classifier.train_utils import fit_biencoder       
+                clf = fit_biencoder(feature_extractor,df_train)
             else:
                 print("Model's not supported.")
                 return
 
-            val_pred = clf.predict(X_val)
+            if model not in ['biencoder']:
+                val_pred = clf.predict(X_val)
+            else:
+                val_pred = clf.predict(df_val)
             report = classification_report(df_val["intent"],val_pred,
                                            zero_division=0,output_dict=True
                                           )
@@ -111,20 +118,20 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
             output_metric_dict[f"mean_weighted_avg_{metric}"] = mean_score
             output_metric_dict[f"std_weighted_avg_{metric}"] = std_score
         
-    
-    # Generate Features from Full Data
-    output = build_features(feature_extractor, df["text"], df["intent"],
-                           None, 
-                           df_val_ckpt["text"] if df_val_ckpt is not None else None,
-                           df_val_ckpt["intent"] if df_val_ckpt is not None else None,
-                           model=feature_model,
-                           **kwargs)
-    
-    if ("_best_ckpt" in feature_extractor) and (df_val_ckpt is not None):
-        output, output_ckpt = output
-        X_val_ckpt, y_val_ckpt = output_ckpt
+    if model not in ['biencoder']:
+        # Generate Features from Full Data
+        output = build_features(feature_extractor, df["text"], df["intent"],
+                            None, 
+                            df_val_ckpt["text"] if df_val_ckpt is not None else None,
+                            df_val_ckpt["intent"] if df_val_ckpt is not None else None,
+                            model=feature_model,
+                            **kwargs)
+        
+        if ("_best_ckpt" in feature_extractor) and (df_val_ckpt is not None):
+            output, output_ckpt = output
+            X_val_ckpt, y_val_ckpt = output_ckpt
 
-    X_full,y_full = output
+        X_full,y_full = output
     
     #Train on full data
     if model == "gaussian_nb":
@@ -151,6 +158,9 @@ def train_classifier(df: pd.DataFrame, model: str, feature_extractor: str,
     elif model == "mlp_dense_flipout": 
         from ood_detection.classifier.train_utils import fit_mlp_dense_flipout       
         clf_full = fit_mlp_dense_flipout(feature_extractor,X_full,y_full)
+    elif model == "biencoder": 
+        from ood_detection.classifier.train_utils import fit_biencoder       
+        clf_full = fit_biencoder(feature_extractor,df)
     else:
         print("Model's not supported.")
         return

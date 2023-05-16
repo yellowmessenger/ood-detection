@@ -24,16 +24,12 @@ class BaseDetector:
     def predict_score(self):
         pass
 
-    def benchmark(self,df_test: pd.DataFrame, indomain_classes: list):
+    def benchmark(self,df_test: pd.DataFrame, ood_label: str):
         if 'intent' not in df_test.columns:
             print("column 'intent' is missing in df_val. Make sure to change your target variable name as 'intent")
             return
         
-        if len(indomain_classes)==0:
-            print("found empty indomain_classes. Make sure to specify all indomain classes inside a list.")
-            return
-        
-        df_test['is_outdomain'] = df_test['intent'].apply(lambda x: x not in indomain_classes)
+        df_test['is_outdomain'] = df_test['intent'].apply(lambda x: x == ood_label)
         pred_scores = self.predict_score(df_test)
 
         benchmark_dict = {}
@@ -44,16 +40,12 @@ class BaseDetector:
 
         return benchmark_dict
 
-    def tune_threshold(self, df_val: pd.DataFrame, indomain_classes: list):
+    def tune_threshold(self, df_val: pd.DataFrame, ood_label: str):
         if 'intent' not in df_val.columns:
             print("column 'intent' is missing in df_val. Make sure to change your target variable name as 'intent")
             return
         
-        if len(indomain_classes)==0:
-            print("found empty indomain_classes. Make sure to specify all indomain classes inside a list.")
-            return
-        
-        df_val['is_outdomain'] = df_val['intent'].apply(lambda x: x not in indomain_classes)
+        df_val['is_outdomain'] = df_val['intent'].apply(lambda x: x == ood_label)
 
         # Init visualization data
         df_viz = df_val.copy()
