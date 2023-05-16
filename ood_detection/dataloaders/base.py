@@ -11,16 +11,19 @@ class DataLoader:
     def __init__(self) -> None:
         pass
 
-    def load(self, name: str) -> pd.DataFrame:
+    def load(self, name: str, include_ood_in_train: bool) -> pd.DataFrame:
         
         if name == 'clinc150':
             with open(f"{dirname}/raw/clinc150/data_full.json","r") as f_in:
                 clinc = json.load(f_in)
             
-            df_train = pd.concat([
-                pd.DataFrame(clinc['train'],columns=['text','intent']),
-                pd.DataFrame(clinc['oos_train'],columns=['text','intent'])
-            ]).reset_index(drop=True)
+            if include_ood_in_train:
+                df_train = pd.concat([
+                    pd.DataFrame(clinc['train'],columns=['text','intent']),
+                    pd.DataFrame(clinc['oos_train'],columns=['text','intent'])
+                ]).reset_index(drop=True)
+            else:
+                df_train =  pd.DataFrame(clinc['train'],columns=['text','intent']).reset_index(drop=True)
             df_val = pd.concat([
                 pd.DataFrame(clinc['val'],columns=['text','intent']),
                 pd.DataFrame(clinc['oos_val'],columns=['text','intent'])
@@ -36,12 +39,16 @@ class DataLoader:
             train_id_text = train_id_temp[2].tolist()
             train_id_intent = train_id_temp[0].tolist()
 
-            train_ood_temp = pd.read_csv(f"{dirname}/raw/rostd/OODrelease.tsv",sep='\t',header=None)
-            train_ood_text = train_ood_temp[2].tolist()
-            train_ood_intent = train_ood_temp[0].map(lambda label: "oos" if label == "outOfDomain" else label).tolist()
-            
-            train_dict['text'] = train_id_text + train_ood_text
-            train_dict['intent'] = train_id_intent + train_ood_intent
+            if include_ood_in_train:
+                train_ood_temp = pd.read_csv(f"{dirname}/raw/rostd/OODrelease.tsv",sep='\t',header=None)
+                train_ood_text = train_ood_temp[2].tolist()
+                train_ood_intent = train_ood_temp[0].map(lambda label: "oos" if label == "outOfDomain" else label).tolist()
+                
+                train_dict['text'] = train_id_text + train_ood_text
+                train_dict['intent'] = train_id_intent + train_ood_intent
+            else:
+                train_dict['text'] = train_id_text
+                train_dict['intent'] = train_id_intent
             df_train = pd.DataFrame(train_dict)
 
 
@@ -61,19 +68,19 @@ class DataLoader:
             return {'train':df_train,'val':df_val,'test':df_test}
         elif name == 'snips':
             # Reference: https://github.com/huawei-noah/noah-research/blob/master/Maha_OOD/scripts/dataset_preprocess/snips_create_splits.py
-            df_train = pd.read_csv(f"{dirname}/raw/snips/train.csv").rename(columns={'label':'labels'})
-            df_val = pd.read_csv(f"{dirname}/raw/snips/valid.csv").rename(columns={'label':'labels'})
-            df_test = pd.read_csv(f"{dirname}/raw/snips/test.csv").rename(columns={'label':'labels'})
+            df_train = pd.read_csv(f"{dirname}/raw/snips/train.csv").rename(columns={'label':'intent'})
+            df_val = pd.read_csv(f"{dirname}/raw/snips/valid.csv").rename(columns={'label':'intent'})
+            df_test = pd.read_csv(f"{dirname}/raw/snips/test.csv").rename(columns={'label':'intent'})
 
             K = 0.75 #The ID part covers about 75% of the whole dataset. 
-            label_space = df_train.labels.value_counts()
+            label_space = df_train.intent.value_counts()
             ind_classes = get_snips_splits(label_space.to_dict(), False, K, 5)
             print("\n".join([" ".join(x) for x in ind_classes]))
             
             out = {}
             for num, in_class in enumerate(ind_classes):
                 final_train_df, final_val_df, final_test_df = create_final_snips_data(
-                    df_train, df_val, df_test, in_class)
+                    df_train, df_val, df_test, in_class, include_ood_in_train)
                 print(len(final_train_df))
 
                 out[num] = {'train':final_train_df,'val':final_val_df,'test':final_test_df}
@@ -83,16 +90,17 @@ class DataLoader:
             return
 
 
-def create_final_snips_data(train_df, val_df, test_df, indomain_classes):
+def create_final_snips_data(train_df, val_df, test_df, indomain_classes,
+                            include_ood_in_train):
     train_df = train_df.copy()
     val_df = val_df.copy()
     test_df = test_df.copy()
-    train_df = train_df[train_df.labels.isin(indomain_classes)]
-    train_df["is_ood"] = 0
-    val_df["is_ood"] = 1
-    val_df.loc[val_df.labels.isin(indomain_classes), "is_ood"] = 0
-    test_df["is_ood"] = 1
-    test_df.loc[test_df.labels.isin(indomain_classes), "is_ood"] = 0
+    if include_ood_in_train:
+        train_df.loc[~train_df.intent.isin(indomain_classes), "intent"] = "oos"
+    else:
+        train_df = train_df[train_df.labels.isin(indomain_classes)]
+    val_df.loc[~val_df.intent.isin(indomain_classes), "intent"] = "oos"
+    test_df.loc[~test_df.intent.isin(indomain_classes), "intent"] = "oos"
 
     return train_df, val_df, test_df
 
