@@ -14,14 +14,10 @@ class BinaryMSP(BaseDetector):
         # Else, the higher the score, the more likely it's outdomain
         self.outdomain_is_lower = False 
 
-    def fit(self,df: pd.DataFrame, indomain_classes: list, use_best_ckpt: bool = False):        
-        if len(indomain_classes)==0:
-            print("found empty indomain_classes. Make sure to specify all indomain classes inside a list.")
-            return
-
+    def fit(self,df: pd.DataFrame, ood_label: str, use_best_ckpt: bool = False):        
         # Convert into binary classes
         df_binary = df[['text','intent']].copy()
-        df_binary['intent'] = df_binary['intent'].apply(lambda x: x not in indomain_classes)
+        df_binary['intent'] = df_binary['intent'].apply(lambda x: x == ood_label)
 
         # Fit Classifier
         model_name = "mlp_best_ckpt" if use_best_ckpt else "mlp"

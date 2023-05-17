@@ -12,5 +12,6 @@ from ood_detection.detector.knn import KNN
 from ood_detection.detector.mc_dropout import MCDropout
 from ood_detection.detector.bnn_vi import BNNVI
 from ood_detection.detector.biencoder_cosine import BiEncoderCosine
+from ood_detection.detector.biencoder_lof import BiEncoderLOF
 
 from ood_detection.dataloaders.base import DataLoader
