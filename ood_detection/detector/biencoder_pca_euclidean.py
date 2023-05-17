@@ -3,9 +3,8 @@ import numpy as np
 from ood_detection.classifier.train import train_classifier
 from ood_detection.detector.base import BaseDetector
 from sklearn.decomposition import PCA
-from sklearn.metrics.pairwise import cosine_similarity
 
-class BiEncoderPCACosine(BaseDetector):
+class BiEncoderPCAEuclidean(BaseDetector):
     def __init__(self,feature_extractor: str) -> None:
         BaseDetector.__init__(self) 
         self.feature_extractor = feature_extractor
@@ -16,7 +15,7 @@ class BiEncoderPCACosine(BaseDetector):
         # This parameter will be used to decide the prediction class
         # If True, the lower the score, the more likely it's outdomain
         # Else, the higher the score, the more likely it's outdomain
-        self.outdomain_is_lower = True
+        self.outdomain_is_lower = False
 
         print("="*50)
         print("This Detector can only be used when Out-Domain data does not exist in the training data.")
@@ -41,5 +40,5 @@ class BiEncoderPCACosine(BaseDetector):
         
         q_embeddings = self.clf.clf.encode(df_test['text'].to_list())
         q_pca_transformed = self.pca.transform(q_embeddings)
-        cosine_sims = cosine_similarity(q_pca_transformed, self.train_pca_transformed)
-        return np.max(cosine_sims, axis=1)
+        euclid_dist = np.array([np.linalg.norm(self.train_pca_transformed-q_emb,axis=1) for q_emb in q_pca_transformed])
+        return np.min(euclid_dist, axis=1)  
