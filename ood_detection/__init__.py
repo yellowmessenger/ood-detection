@@ -14,5 +14,6 @@ from ood_detection.detector.bnn_vi import BNNVI
 from ood_detection.detector.biencoder_cosine import BiEncoderCosine
 from ood_detection.detector.biencoder_lof import BiEncoderLOF
 from ood_detection.detector.biencoder_maha import BiEncoderMaha
+from ood_detection.detector.biencoder_entropy import BiEncoderEntropy
 
 from ood_detection.dataloaders.base import DataLoader
