@@ -1,0 +1,64 @@
+# Copyright (C) 2021. Huawei Technologies Co., Ltd. All rights reserved.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the MIT License.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MIT License for more details.
+
+training:
+  shuffle: true
+  train_batch_size: 64
+  val_batch_size: 100
+  max_epochs: 100
+  num_workers: 0
+  optimizer:
+    lr: 0.0001
+    beta1: 0.9
+    beta2: 0.999
+  back_optimizer:
+    lr: 0.0001
+    beta1: 0.9
+    beta2: 0.999
+  scheduler:
+    use: false
+    gamma: 0.999
+  early_stop:
+    monitor: 'val_loss'
+    patience: 4
+    mode: 'min'
+    min_delta: 0.0
+  gradient_clip_val: 0
+dataset: 
+  name: 'snips_75'
+  data_root_dir: 'ood_detection/dataloaders/raw/snips'
+  return_intent_labels: true
+  version: 0
+lm:
+  name: 'lstm'
+  hidden_size: 512
+  num_layers: 1
+  lstm_dropout: 0
+  dropout: 0.3
+  input_dropout: 0.5
+  l2_coeff: 0
+background_lm:
+  name: 'lstm'
+  hidden_size: 256
+  num_layers: 1
+  lstm_dropout: 0
+  dropout: 0.0
+  input_dropout: 0.5
+  l2_coeff: 0.0001
+embedder:
+  path_to_vectors: 'ood_detection/dataloaders/raw/'
+  name: '6B'
+  dim: 100
+  freeze: false
+model_name: llr
+device: 0
+p_noise: 0.5
+noise_type: 'uniform'
+add_valid_to_vocab: false
+add_test_to_vocab: false
+experiment_name: 'debug'

@@ -19,5 +19,6 @@ from ood_detection.detector.biencoder_pca_entropy import BiEncoderPCAEntropy
 from ood_detection.detector.biencoder_pca_cosine import BiEncoderPCACosine
 from ood_detection.detector.biencoder_pca_euclidean import BiEncoderPCAEuclidean
 from ood_detection.detector.rake import RAKE
+from ood_detection.detector.likelihood_ratio import LikelihoodRatio
 
 from ood_detection.dataloaders.base import DataLoader
