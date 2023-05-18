@@ -1,4 +1,4 @@
-# TEXT Open Intent Recognition (TEXTOIR)
+# OOD-Detection
 
 ...
 
