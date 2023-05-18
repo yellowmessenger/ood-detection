@@ -14,7 +14,15 @@ class Entropy(BaseDetector):
         # Else, the higher the score, the more likely it's outdomain
         self.outdomain_is_lower = False 
 
+        print("="*50)
+        print("This Detector can only be used when Out-Domain data does not exist in the training data.")
+        print("="*50)
+
     def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):
+        if self.ood_label in df['intent'].unique():
+            print(f"Found {self.ood_label} in training data. This detector can only be used when Out-Domain data does not exist in the training data.")
+            return
+        
         # Fit Classifier
         model_name = "mlp_best_ckpt" if use_best_ckpt else "mlp"
         clf = train_classifier(df, model_name, self.feature_extractor, skip_cv = True)

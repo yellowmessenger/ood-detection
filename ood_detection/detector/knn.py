@@ -13,7 +13,15 @@ class KNN(BaseDetector):
         # Else, the higher the score, the more likely it's outdomain
         self.outdomain_is_lower = False 
 
+        print("="*50)
+        print("This Detector can only be used when Out-Domain data does not exist in the training data.")
+        print("="*50)
+
     def fit(self,df: pd.DataFrame):
+        if self.ood_label in df['intent'].unique():
+            print(f"Found {self.ood_label} in training data. This detector can only be used when Out-Domain data does not exist in the training data.")
+            return
+
         # Generate Embeddings
         x_train,_= build_features(self.feature_extractor,
                                   df['text'],df['intent'],
