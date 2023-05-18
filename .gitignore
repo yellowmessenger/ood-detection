@@ -19,6 +19,7 @@ creds.js
 
 # Private Files
 *.hdf5
+*.txt
 
 # Private Folder
 tmp_logs/
