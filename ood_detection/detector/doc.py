@@ -27,10 +27,13 @@ class DOC(BaseDetector):
         else:
             self.outdomain_is_lower = True     
         
-    def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False):        
+    def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False,
+            df_val_ckpt: pd.DataFrame = None):        
         # Fit Classifier
         model_name = "mlp_best_ckpt" if use_best_ckpt else "mlp"
-        clf = train_classifier(df, model_name, self.feature_extractor, skip_cv = True, 
+        clf = train_classifier(df, model_name, self.feature_extractor, 
+                               df_val_ckpt = df_val_ckpt,
+                               skip_cv = True, 
                                use_multi_label=True)
 
         self.clf = clf

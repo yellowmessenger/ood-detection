@@ -14,14 +14,17 @@ class BinaryMSP(BaseDetector):
         # Else, the higher the score, the more likely it's outdomain
         self.outdomain_is_lower = False 
 
-    def fit(self,df: pd.DataFrame, ood_label: str, use_best_ckpt: bool = False):        
+    def fit(self,df: pd.DataFrame, ood_label: str, use_best_ckpt: bool = False, 
+            df_val_ckpt: pd.DataFrame = None):        
         # Convert into binary classes
         df_binary = df[['text','intent']].copy()
         df_binary['intent'] = df_binary['intent'].apply(lambda x: x == ood_label)
 
         # Fit Classifier
         model_name = "mlp_best_ckpt" if use_best_ckpt else "mlp"
-        clf = train_classifier(df_binary, model_name, self.feature_extractor, skip_cv = True)
+        clf = train_classifier(df_binary, model_name, self.feature_extractor, 
+                               df_val_ckpt = df_val_ckpt,
+                               skip_cv = True)
 
         self.clf = clf
 

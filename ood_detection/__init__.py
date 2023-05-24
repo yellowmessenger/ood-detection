@@ -22,3 +22,25 @@ from ood_detection.detector.rake import RAKE
 from ood_detection.detector.likelihood_ratio import LikelihoodRatio
 
 from ood_detection.dataloaders.base import DataLoader
+
+detector_map = {
+                'TrustScores': TrustScores, 
+                'Entropy': Entropy, 
+                'LOF': LOF, 
+                'BinaryMSP':BinaryMSP, 
+                'MSP': MSP, 
+                'DOC': DOC, 
+                'ADB': ADB, 
+                'KNN': KNN,
+                'MCDropout': MCDropout,
+                'BNNVI': BNNVI,
+                'BiEncoderCosine': BiEncoderCosine,
+                'BiEncoderLOF': BiEncoderLOF,
+                'BiEncoderMaha': BiEncoderMaha,
+                'BiEncoderEntropy': BiEncoderEntropy,
+                'BiEncoderPCAEntropy': BiEncoderPCAEntropy,
+                'BiEncoderPCACosine': BiEncoderPCACosine,
+                'BiEncoderPCAEuclidean': BiEncoderPCAEuclidean,
+                'RAKE': RAKE,
+                'LikelihoodRatio': LikelihoodRatio,
+            }
