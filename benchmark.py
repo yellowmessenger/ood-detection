@@ -127,5 +127,5 @@ if __name__ == '__main__':
     benchmark_dict = run_benchmark(args)
 
     # Save the benchmarking results
-    with open(output_path,"w") as f_out:
+    with open(output_path+".json","w") as f_out:
         json.dump(benchmark_dict,f_out)
