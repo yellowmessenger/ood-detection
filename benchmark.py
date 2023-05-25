@@ -5,6 +5,16 @@ from ood_detection import detector_map, DataLoader
 
 def parse_arguments():
 
+    def str2bool(v):
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--output_dir", default= './benchmarking_results', type=str, 
@@ -33,10 +43,10 @@ def parse_arguments():
                         required = True,
                         help="which feature extractor to use")
     
-    parser.add_argument("--use_best_ckpt", type=bool, default=False,
+    parser.add_argument("--use_best_ckpt", type=str2bool, default=False,
                         help="whether to use best checkpoint of the classifier based on validation data")
     
-    parser.add_argument("--is_ood_label_in_train", type=bool, default=True,
+    parser.add_argument("--is_ood_label_in_train", type=str2bool, default = True,
                         help="whether to add ood label in the training data")
     
     parser.add_argument("--ood_label", default = 'oos', type=str, required = True,
@@ -55,6 +65,8 @@ def parse_arguments():
 
 def run_benchmark(args):
     #Loading Data
+    print(args.dataset)
+    print(args.is_ood_label_in_train)
     data = DataLoader().load(args.dataset,args.is_ood_label_in_train)
 
     #Initiate Detector
@@ -82,6 +94,10 @@ def run_benchmark(args):
         detector = detector(args.ood_label)
 
     #Fitting the detector
+    if detector is None:
+        print(f"Detector {args.detector} is not initialized correctly")
+        return
+
     if args.detector in ['BiEncoderCosine','BiEncoderLOF','BiEncoderMaha',
                          'BiEncoderEntropy','BiEncoderPCAEntropy',
                          'BiEncoderPCACosine','BiEncoderPCAEuclidean',
