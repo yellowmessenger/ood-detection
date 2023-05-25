@@ -11,7 +11,7 @@
 1. Use anaconda to create Python (version >= 3.8) environment with Poetry
 ```
 conda create --name ood_detection python=3.8 poetry=1.4.0
-conda activate textoir
+conda activate ood_detection
 ```
 2. Clone this repository
 ```
