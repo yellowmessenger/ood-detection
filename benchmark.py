@@ -65,8 +65,6 @@ def parse_arguments():
 
 def run_benchmark(args):
     #Loading Data
-    print(args.dataset)
-    print(args.is_ood_label_in_train)
     data = DataLoader().load(args.dataset,args.is_ood_label_in_train)
 
     #Initiate Detector
