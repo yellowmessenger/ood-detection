@@ -23,6 +23,8 @@ cd ood-detection
 poetry install  
 ```
 
+4. (Optional) if you want to run LikelihoodRatio, you also need to download the Glove 6B 100D embeddings. You can download it from [here](https://www.kaggle.com/datasets/danielwillgeorge/glove6b100dtxt). Please make sure to put it in the `ood_detection/dataloaders/raw` folder.
+
 ## Citations
 
 If this work is helpful, or you want to use the codes and results in this repo, please cite our paper:
