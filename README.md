@@ -20,6 +20,7 @@ cd ood-detection
 ```
 3. Install requirements with `poetry`
 ```
+poetry config virtualenvs.create false
 poetry install  
 ```
 
