@@ -23,10 +23,6 @@ class RAKE(BaseDetector):
         BaseDetector.__init__(self)
         self.ood_label = ood_label
 
-        print("="*50)
-        print("This Detector can only be used when Out-Domain data does not exist in the training data.")
-        print("="*50)
-
     def fit(self,df: pd.DataFrame,enhanced: bool = False):
         if self.ood_label in df['intent'].unique():
             print(f"Found {self.ood_label} in training data. This detector can only be used when Out-Domain data does not exist in the training data.")
