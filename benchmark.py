@@ -67,8 +67,8 @@ def run_benchmark(args):
     if args.detector in ['BiEncoderCosine','BiEncoderLOF','BiEncoderMaha',
                          'BiEncoderEntropy','BiEncoderPCAEntropy',
                          'BiEncoderPCACosine','BiEncoderPCAEuclidean',
-                         'BinaryMSP','Entropy','KNN','LOF','TrustScores']:
-        detector = detector(args.feature_extractor)
+                         'Entropy','KNN','LOF','TrustScores']:
+        detector = detector(args.feature_extractor,args.ood_label)
     elif args.detector == 'ADB':
         detector = detector(args.feature_extractor,args.ood_label,
                             args.adb_alpha,args.adb_step_size
@@ -87,12 +87,7 @@ def run_benchmark(args):
                          'BiEncoderPCACosine','BiEncoderPCAEuclidean',
                          'ADB','BNNVI','KNN','RAKE']:
         detector.fit(data['train'])
-    elif args.detector == 'BinaryMSP':
-        if args.use_best_ckpt:
-            detector.fit(data['train'],args.ood_label,True,data['val'])
-        else:
-            detector.fit(data['train'],args.ood_label)
-    elif args.detector in ['DOC','Entropy','LOF','MCDropout','MSP','TrustScores']:
+    elif args.detector in ['BinaryMSP','DOC','Entropy','LOF','MCDropout','MSP','TrustScores']:
         if args.use_best_ckpt:
             detector.fit(data['train'],True,data['val'])
         else:
@@ -123,9 +118,12 @@ if __name__ == '__main__':
     if args.detector == 'ADB':
         output_path += f'_{args.adb_alpha}_{args.adb_step_size}'
 
-    # Running the benchmark
-    benchmark_dict = run_benchmark(args)
+    try:
+        # Running the benchmark
+        benchmark_dict = run_benchmark(args)
 
-    # Save the benchmarking results
-    with open(output_path+".json","w") as f_out:
-        json.dump(benchmark_dict,f_out)
+        # Save the benchmarking results
+        with open(output_path+".json","w") as f_out:
+            json.dump(benchmark_dict,f_out)
+    except Exception as e:
+        print(e)

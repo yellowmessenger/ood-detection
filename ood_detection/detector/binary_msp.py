@@ -5,16 +5,17 @@ from ood_detection.classifier.feature_extractor import load_feature_extractor, b
 from ood_detection.detector.base import BaseDetector
 
 class BinaryMSP(BaseDetector):
-    def __init__(self,feature_extractor: str) -> None:
+    def __init__(self,feature_extractor: str, ood_label: str) -> None:
         BaseDetector.__init__(self) 
         self.feature_extractor = feature_extractor
+        self.ood_label = ood_label
 
         # This parameter will be used to decide the prediction class
         # If True, the lower the score, the more likely it's outdomain
         # Else, the higher the score, the more likely it's outdomain
         self.outdomain_is_lower = False 
 
-    def fit(self,df: pd.DataFrame, ood_label: str, use_best_ckpt: bool = False, 
+    def fit(self,df: pd.DataFrame, use_best_ckpt: bool = False, 
             df_val_ckpt: pd.DataFrame = None):        
         # Convert into binary classes
         df_binary = df[['text','intent']].copy()

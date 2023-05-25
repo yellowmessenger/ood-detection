@@ -5,9 +5,10 @@ from ood_detection.detector.base import BaseDetector
 from sklearn.metrics.pairwise import cosine_similarity
 
 class BiEncoderEntropy(BaseDetector):
-    def __init__(self,feature_extractor: str) -> None:
+    def __init__(self,feature_extractor: str, ood_label: str) -> None:
         BaseDetector.__init__(self) 
         self.feature_extractor = feature_extractor
+        self.ood_label = ood_label
 
         if self.feature_extractor not in ['mpnet']:
             raise NotImplementedError("Currently only 'mpnet' is supported. You can add any new sentence-trasnformer model.")

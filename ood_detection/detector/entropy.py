@@ -5,9 +5,10 @@ from ood_detection.classifier.feature_extractor import load_feature_extractor, b
 from ood_detection.detector.base import BaseDetector
 
 class Entropy(BaseDetector):
-    def __init__(self,feature_extractor: str) -> None:
+    def __init__(self,feature_extractor: str, ood_label: str) -> None:
         BaseDetector.__init__(self) 
         self.feature_extractor = feature_extractor
+        self.ood_label = ood_label
 
         # This parameter will be used to decide the prediction class
         # If True, the lower the score, the more likely it's outdomain
