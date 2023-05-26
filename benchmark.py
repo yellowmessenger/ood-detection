@@ -77,7 +77,7 @@ def run_benchmark(args):
     if args.detector in ['BiEncoderCosine','BiEncoderLOF','BiEncoderMaha',
                          'BiEncoderEntropy','BiEncoderPCAEntropy',
                          'BiEncoderPCACosine','BiEncoderPCAEuclidean',
-                         'Entropy','KNN','LOF','TrustScores']:
+                         'Entropy','KNN','LOF','TrustScores','BinaryMSP']:
         detector = detector(args.feature_extractor,args.ood_label)
     elif args.detector == 'ADB':
         detector = detector(args.feature_extractor,args.ood_label,
