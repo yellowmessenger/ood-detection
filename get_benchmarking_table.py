@@ -45,8 +45,8 @@ def summarize(args):
     df = pd.DataFrame(results)
     df = df.sort_values(['dataset','detector','feature_extractor',
                          'use_best_ckpt','is_ood_label_in_train'])
-    df['fpr_95'] = df.apply(lambda row: row['fpr_95'] if ('fpr95' not in df.columns) or (pd.isnull(row['fpr95'])))
-    df['fpr_90'] = df.apply(lambda row: row['fpr_90'] if ('fpr90' not in df.columns) or (pd.isnull(row['fpr90'])))
+    df['fpr_95'] = df.apply(lambda row: row['fpr_95'] if ('fpr95' not in df.columns) or (pd.isnull(row['fpr95'])) else row['fpr95'],axis=1)
+    df['fpr_90'] = df.apply(lambda row: row['fpr_90'] if ('fpr90' not in df.columns) or (pd.isnull(row['fpr90'])) else row['fpr90'],axis=1)
     if all(x in df.columns for x in ['fpr95','fpr90']):
         df = df.drop(columns=['fpr95','fpr90'])
     print(df)
