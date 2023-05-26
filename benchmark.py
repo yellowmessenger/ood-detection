@@ -40,13 +40,12 @@ def parse_arguments():
     
     parser.add_argument("--feature_extractor", choices=['mpnet','use','bert'], 
                         type=str,
-                        required = True,
                         help="which feature extractor to use")
     
-    parser.add_argument("--use_best_ckpt", type=str2bool, default=False,
+    parser.add_argument("--use_best_ckpt", type=str2bool,
                         help="whether to use best checkpoint of the classifier based on validation data")
     
-    parser.add_argument("--is_ood_label_in_train", type=str2bool, default = True,
+    parser.add_argument("--is_ood_label_in_train", type=str2bool,
                         help="whether to add ood label in the training data")
     
     parser.add_argument("--ood_label", default = 'oos', type=str, required = True,

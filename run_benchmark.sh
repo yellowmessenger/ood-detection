@@ -2,13 +2,25 @@
 
 for dataset in 'clinc150' 'rostd' 'snips'
 do
+    for detector in 'RAKE' 'LikelihoodRatio'
+        do
+        output_dir='./benchmarking_results'
+        echo 'Dataset:' $dataset
+        echo 'Detector:' $detector
+        echo 'Output Dir:' $output_dir
+        python benchmark.py \
+                --output_dir $output_dir \
+                --dataset $dataset \
+                --detector $detector \
+                --ood_label 'oos'
+        done
     for feature_extractor in 'use' 'mpnet' 'bert'
     do
         for use_best_ckpt in False True
         do
             for is_ood_label_in_train in True False
             do
-                for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'BiEncoderCosine' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean' 'RAKE' 'LikelihoodRatio'
+                for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'BiEncoderCosine' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean'
                 do
                     output_dir='./benchmarking_results'
                     echo 'Dataset:' $dataset
