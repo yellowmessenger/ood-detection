@@ -10,7 +10,7 @@ training:
   shuffle: true
   train_batch_size: 128
   val_batch_size: 100
-  max_epochs: 100
+  max_epochs: 1
   num_workers: 0
   optimizer:
     lr: 0.0005

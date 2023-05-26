@@ -110,7 +110,7 @@ class MLP:
         clf.summary()
 
         history = clf.fit(x_train, y_train,
-                      epochs=kwargs.get("epoch",25), 
+                      epochs=kwargs.get("epoch",10), 
                       batch_size=32, 
                       validation_split=0, 
                       callbacks=callbacks,
@@ -229,7 +229,7 @@ class ADBModel:
         batch_size = 300  # same as above - to guarantee...
 
         clf.compile(optimizer=Adam(learning_rate=1e-4), loss=loss)
-        clf.fit(x_train, y_train, epochs=20, shuffle=shuffle, batch_size=batch_size)
+        clf.fit(x_train, y_train, epochs=10, shuffle=shuffle, batch_size=batch_size)
 
         self.clf = clf
 
@@ -325,7 +325,7 @@ class MLPDenseFlipout:
         clf.summary()
 
         history = clf.fit(x_train, y_train,
-                      epochs=kwargs.get("epoch",25), 
+                      epochs=kwargs.get("epoch",10), 
                       batch_size=32, 
                       shuffle=True, verbose=False) 
 

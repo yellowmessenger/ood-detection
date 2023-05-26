@@ -6,7 +6,7 @@ do
     do
         for use_best_ckpt in False True
         do
-            for is_ood_label_in_train in False True
+            for is_ood_label_in_train in True False
             do
                 for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'MCDropout' 'BNNVI' 'BiEncoderCosine' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean' 'RAKE' 'LikelihoodRatio'
                 do

@@ -56,7 +56,7 @@ class MCDropout(BaseDetector):
 
 
     def bayesian_pred(self,text):
-        seqs = [text.lower()]*100
+        seqs = [text.lower()]*15
         seqs = pd.Series(list(map(lambda x: x.lower(), seqs)))
         x_test,_ = build_features(self.feature_extractor,
                                     seqs,seqs,

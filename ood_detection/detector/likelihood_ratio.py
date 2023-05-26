@@ -67,3 +67,8 @@ class LikelihoodRatio():
     
     def benchmark(self):
         self.trainer.test()
+
+        benchmark_dict = self.trainer.callback_metrics
+        benchmark_dict = {k.split('test/')[1]:v for k,v in benchmark_dict.items() if 'test/' in k and ('ood' in k or 'auroc' in k)}
+        benchmark_dict = {k.split('_ood')[0] if '_ood' in k else k:v for k,v in benchmark_dict.items()}
+        return benchmark_dict
