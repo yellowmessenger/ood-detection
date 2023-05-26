@@ -19,7 +19,7 @@ class BinaryMSP(BaseDetector):
             df_val_ckpt: pd.DataFrame = None):        
         # Convert into binary classes
         df_binary = df[['text','intent']].copy()
-        df_binary['intent'] = df_binary['intent'].apply(lambda x: x == ood_label)
+        df_binary['intent'] = df_binary['intent'].apply(lambda x: x == self.ood_label)
 
         # Fit Classifier
         model_name = "mlp_best_ckpt" if use_best_ckpt else "mlp"
