@@ -8,7 +8,7 @@ do
         do
             for is_ood_label_in_train in True False
             do
-                for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'MCDropout' 'BNNVI' 'BiEncoderCosine' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean' 'RAKE' 'LikelihoodRatio'
+                for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'BiEncoderCosine' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean' 'RAKE' 'LikelihoodRatio'
                 do
                     output_dir='./benchmarking_results'
                     echo 'Dataset:' $dataset
