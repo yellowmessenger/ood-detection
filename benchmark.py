@@ -135,8 +135,9 @@ if __name__ == '__main__':
         # Running the benchmark
         benchmark_dict = run_benchmark(args)
 
-        # Save the benchmarking results
-        with open(output_path+".json","w") as f_out:
-            json.dump(benchmark_dict,f_out)
+        if benchmark_dict is not None:
+            # Save the benchmarking results
+            with open(output_path+".json","w") as f_out:
+                json.dump(benchmark_dict,f_out)
     except Exception as e:
         print(e)
