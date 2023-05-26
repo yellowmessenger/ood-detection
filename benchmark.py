@@ -91,22 +91,22 @@ def run_benchmark(args):
         detector = detector(args.ood_label)
 
     #Fitting the detector
-    if detector is None:
-        print(f"Detector {args.detector} is not initialized correctly")
-        return
-
     if args.detector in ['BiEncoderCosine','BiEncoderLOF','BiEncoderMaha',
                          'BiEncoderEntropy','BiEncoderPCAEntropy',
                          'BiEncoderPCACosine','BiEncoderPCAEuclidean',
                          'ADB','BNNVI','KNN','RAKE']:
-        detector.fit(data['train'])
+        history = detector.fit(data['train'])
     elif args.detector in ['BinaryMSP','DOC','Entropy','LOF','MCDropout','MSP','TrustScores']:
         if args.use_best_ckpt:
-            detector.fit(data['train'],True,data['val'])
+            history = detector.fit(data['train'],True,data['val'])
         else:
-            detector.fit(data['train'])
+            history = detector.fit(data['train'])
     elif args.detector == 'LikelihoodRatio':
-        detector.fit()
+        history = detector.fit()
+
+    if history == 'error':
+        print(f"Detector {args.detector} is not initialized correctly")
+        return
 
     # Benchmark on test data
     if args.detector in ['ADB','RAKE']:

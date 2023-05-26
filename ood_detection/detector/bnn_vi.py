@@ -17,10 +17,6 @@ class BNNVI(BaseDetector):
         self.is_ood_label_in_train = is_ood_label_in_train
         self.ood_label = ood_label
 
-        if is_ood_label_in_train and ood_label is None:
-            print("is_ood_label_in_train is set to True but ood_label is None. Make sure to give the value of ood_label column name.")
-            return 
-
         # This parameter will be used to decide the prediction class
         # If True, the lower the score, the more likely it's outdomain
         # Else, the higher the score, the more likely it's outdomain
@@ -29,7 +25,10 @@ class BNNVI(BaseDetector):
         else:
             self.outdomain_is_lower = True     
         
-    def fit(self,df: pd.DataFrame):        
+    def fit(self,df: pd.DataFrame):
+        if self.is_ood_label_in_train and self.ood_label is None:
+            print("is_ood_label_in_train is set to True but ood_label is None. Make sure to give the value of ood_label column name.")
+            return "error"         
         # Fit Classifier
         model_name = "mlp_dense_flipout"
         clf = train_classifier(df, model_name, self.feature_extractor, skip_cv = True,

@@ -26,7 +26,7 @@ class RAKE(BaseDetector):
     def fit(self,df: pd.DataFrame,enhanced: bool = False):
         if self.ood_label in df['intent'].unique():
             print(f"Found {self.ood_label} in training data. This detector can only be used when Out-Domain data does not exist in the training data.")
-            return
+            return "error"
 
         # Generate Keywords        
         train_utterances = preprocess_text(df['text'].tolist())

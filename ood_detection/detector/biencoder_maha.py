@@ -20,7 +20,7 @@ class BiEncoderMaha(BaseDetector):
     def fit(self,df: pd.DataFrame):    
         if self.ood_label in df['intent'].unique():
             print(f"Found {self.ood_label} in training data. This detector can only be used when Out-Domain data does not exist in the training data.")
-            return
+            return "error"
     
         # Fit Classifier
         model_name = "biencoder"

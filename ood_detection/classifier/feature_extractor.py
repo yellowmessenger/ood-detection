@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 from transformers import BertTokenizer, BertModel
 import torch
 import gc
+from tqdm import tqdm
 
 def build_features(feature_extractor: str, 
                    text_train: pd.Series, intent_train: pd.Series,
@@ -166,11 +167,16 @@ def get_mpnet_embeddings_from_text(mpnet_model,input):
     return output
 
 
-def build_bert(model,train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series) -> np.array:
+def build_bert(model,train_corpus: pd.Series, y_train: pd.Series, val_corpus: pd.Series, batch_size: int = 32) -> np.array:
     #Train corpus embedding
-    input_ids, attention_mask = generate_indobert_tokens(train_corpus.to_list())
-    X_train = get_bert_embeddings_from_text(model,input_ids, attention_mask, 
-                                                       return_whole_output=False)
+    texts = train_corpus.to_list()
+    X_train = []
+    for i in tqdm(range(0, len(texts), batch_size)):
+        input_ids, attention_mask = generate_indobert_tokens(texts[i:i+batch_size])
+        X_train_i = get_bert_embeddings_from_text(model,input_ids, attention_mask, 
+                                                        return_whole_output=False)
+        X_train.append(X_train_i)
+    X_train = np.concatenate(X_train)
     
     if val_corpus is None:
         return X_train, y_train
