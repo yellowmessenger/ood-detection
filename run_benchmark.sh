@@ -18,12 +18,16 @@ do
     do
         for use_best_ckpt in True False
         do
-            for is_ood_label_in_train in True False
+            for is_ood_label_in_train in False True
             do
                 for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'BiEncoderCosine' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean'
                 do
                     if [[ ($use_best_ckpt == True && ($detector == 'BinaryMSP' || $detector == 'DOC' || $detector == 'Entropy' || $detector == 'LOF' || $detector == 'MSP' || $detector == 'TrustScores')) || ($use_best_ckpt == False) ]]
                     then
+                        if [[ $use_best_ckpt == True ]]
+                        then
+                            feature_extractor=$feature_extractor'_best_ckpt'
+                        fi
                         output_dir='./benchmarking_results'
                         echo 'Dataset:' $dataset
                         echo 'Feature Extractor:' $feature_extractor

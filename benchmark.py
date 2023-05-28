@@ -38,7 +38,9 @@ def parse_arguments():
                         required = True,
                         help="which detector to use")
     
-    parser.add_argument("--feature_extractor", choices=['mpnet','use','bert'], 
+    parser.add_argument("--feature_extractor", choices=['mpnet','use','bert',
+                                                        'mpnet_best_ckpt','use_best_ckpt','bert_best_ckpt'
+                                                        ], 
                         type=str,
                         help="which feature extractor to use")
     
