@@ -118,13 +118,13 @@ class MLP:
                       class_weight=d_class_weights, shuffle=True, verbose=False) 
     
         if (x_val is not None) and (y_val is not None):
-            #plot the training history
-            plt.plot(history.history['loss'], label='Training Loss')
-            plt.plot(history.history['val_loss'], label='Validation Loss')
-            plt.legend()
-            plt.xlabel('Epochs')
-            plt.ylabel('Loss')
-            plt.show()
+            # #plot the training history
+            # plt.plot(history.history['loss'], label='Training Loss')
+            # plt.plot(history.history['val_loss'], label='Validation Loss')
+            # plt.legend()
+            # plt.xlabel('Epochs')
+            # plt.ylabel('Loss')
+            # plt.show()
             
             print("Loading Best Checkpoint Model...")
             clf = tf.keras.models.load_model(filepath)
