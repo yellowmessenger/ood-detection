@@ -50,9 +50,10 @@ def summarize(args):
         df['fpr_90'] = df.apply(lambda row: row['fpr_90'] if ('fpr90' not in df.columns) or (pd.isnull(row['fpr90'])) else row['fpr90'],axis=1)
         if all(x in df.columns for x in ['fpr95','fpr90']):
             df = df.drop(columns=['fpr95','fpr90'])
+    df = df.reset_index(drop=True)
     print(df)
 
-    return df.reset_index(drop=True)
+    return df
                 
 
 
