@@ -36,8 +36,8 @@ def create_final_data(train_df, val_df, test_df, indomain_classes):
     train_df = train_df.copy()
     val_df = val_df.copy()
     test_df = test_df.copy()
-    train_df = train_df[train_df.labels.isin(indomain_classes)]
-    train_df["is_ood"] = 0
+    train_df["is_ood"] = 1
+    train_df.loc[train_df.labels.isin(indomain_classes), "is_ood"] = 0
     val_df["is_ood"] = 1
     val_df.loc[val_df.labels.isin(indomain_classes), "is_ood"] = 0
     test_df["is_ood"] = 1
