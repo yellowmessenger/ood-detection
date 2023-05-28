@@ -1,4 +1,4 @@
-#!/usr/bin bash
+#!/bin/bash
 
 for dataset in 'clinc150' 'rostd' 'snips'
 do
