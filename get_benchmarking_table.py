@@ -52,7 +52,7 @@ def summarize(args):
             df = df.drop(columns=['fpr95','fpr90'])
     print(df)
 
-    return df
+    return df.reset_index(drop=True)
                 
 
 
