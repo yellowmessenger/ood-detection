@@ -16,7 +16,7 @@ do
         done
     for feature_extractor in 'use' 'mpnet' 'bert'
     do
-        for use_best_ckpt in True False
+        for use_best_ckpt in False True
         do
             for is_ood_label_in_train in False True
             do
@@ -27,6 +27,8 @@ do
                         if [ "$use_best_ckpt" = "True" ]
                         then
                             feature_extractor_temp=$feature_extractor'_best_ckpt'
+                        else
+                            feature_extractor_temp=$feature_extractor
                         fi
                         output_dir='./benchmarking_results'
                         echo 'Dataset:' $dataset
