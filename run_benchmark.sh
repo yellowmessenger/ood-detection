@@ -26,11 +26,11 @@ do
                     then
                         if [[ $use_best_ckpt == True ]]
                         then
-                            feature_extractor=$feature_extractor'_best_ckpt'
+                            feature_extractor_temp=$feature_extractor'_best_ckpt'
                         fi
                         output_dir='./benchmarking_results'
                         echo 'Dataset:' $dataset
-                        echo 'Feature Extractor:' $feature_extractor
+                        echo 'Feature Extractor:' $feature_extractor_temp
                         echo 'Detector:' $detector
                         echo 'Use Best Checkpoint Model:' $use_best_ckpt
                         echo 'Add OOD in training data:' $is_ood_label_in_train 
@@ -39,7 +39,7 @@ do
                                 --output_dir $output_dir \
                                 --dataset $dataset \
                                 --detector $detector \
-                                --feature_extractor $feature_extractor \
+                                --feature_extractor $feature_extractor_temp \
                                 --use_best_ckpt $use_best_ckpt \
                                 --is_ood_label_in_train $is_ood_label_in_train \
                                 --ood_label 'oos'
