@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 for dataset in 'clinc150' 'rostd' 'snips'
 do
@@ -22,7 +22,7 @@ do
             do
                 for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'BiEncoderCosine' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean'
                 do
-                    if [[ ($use_best_ckpt == True && ($detector == 'BinaryMSP' || $detector == 'DOC' || $detector == 'Entropy' || $detector == 'LOF' || $detector == 'MSP' || $detector == 'TrustScores')) || ($use_best_ckpt == False) ]]
+                    if [ \( "$use_best_ckpt" = "True" -a \( "$detector" = "BinaryMSP" -o "$detector" = "DOC" -o "$detector" = "Entropy" -o "$detector" = "LOF" -o "$detector" = "MSP" -o "$detector" = "TrustScores" \) \) -o "$use_best_ckpt" = "False" ]
                     then
                         if [[ $use_best_ckpt == True ]]
                         then
