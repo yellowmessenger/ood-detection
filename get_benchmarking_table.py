@@ -59,5 +59,7 @@ def summarize(args):
 if __name__ == "__main__":
     args = parse_arguments()
 
+    pd.set_option('display.max_rows', None)
+
     df_benchmark = summarize(args)
     df_benchmark.to_csv(f"{args.output_dir}/benchmarking_results.csv",index=False)
