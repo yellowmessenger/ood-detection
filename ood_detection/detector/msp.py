@@ -38,9 +38,10 @@ class MSP(BaseDetector):
         self.clf = clf
 
     def predict_score(self,df_test: pd.DataFrame):
-        x_test,_ = build_features(self.feature_extractor,
+        feature_extractor = self.feature_extractor if '_best_ckpt' not in self.feature_extractor else self.feature_extractor.split('_best_ckpt')[0]
+        x_test,_ = build_features(feature_extractor,
                                   df_test['text'],df_test['text'],
-                                  model=load_feature_extractor(self.feature_extractor))
+                                  model=load_feature_extractor(feature_extractor))
         probas = self.clf.predict_proba(x_test)
 
         if self.is_ood_label_in_train:
