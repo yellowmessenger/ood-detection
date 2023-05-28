@@ -24,7 +24,7 @@ do
                 do
                     if [ \( "$use_best_ckpt" = "True" -a \( "$detector" = "BinaryMSP" -o "$detector" = "DOC" -o "$detector" = "Entropy" -o "$detector" = "LOF" -o "$detector" = "MSP" -o "$detector" = "TrustScores" \) \) -o "$use_best_ckpt" = "False" ]
                     then
-                        if [[ $use_best_ckpt == True ]]
+                        if [ "$use_best_ckpt" = "True" ]
                         then
                             feature_extractor_temp=$feature_extractor'_best_ckpt'
                         fi
