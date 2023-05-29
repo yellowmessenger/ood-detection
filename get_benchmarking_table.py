@@ -31,6 +31,9 @@ def summarize(args):
             else:
                 temp['dataset'],temp['detector'],temp['feature_extractor'],temp['use_best_ckpt'],\
                     temp['is_ood_label_in_train'],temp['ood_label'] = tuple(params)
+                
+            if len(str(temp['feature_extractor']).split('-'))>1:#_best_ckpt
+                temp['feature_extractor'] = str(temp['feature_extractor']).split('-')[0]
 
             # Add metric values
             if os.path.isfile(os.path.join(args.results_dir, filename)):
