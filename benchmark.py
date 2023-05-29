@@ -117,7 +117,7 @@ def run_benchmark(args):
     elif args.detector == 'LikelihoodRatio':
         return detector.benchmark()
     else:
-        return detector.benchmark(data['test'],args.ood_label)
+        return detector.benchmark(data['test'],data['val'],args.ood_label)
         
 
 if __name__ == '__main__':

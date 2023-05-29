@@ -24,23 +24,35 @@ class BaseDetector:
     def predict_score(self):
         pass
 
-    def benchmark(self,df_test: pd.DataFrame, ood_label: str):
+    def benchmark(self,df_test: pd.DataFrame, df_val: pd.DataFrame, ood_label: str):
         if 'intent' not in df_test.columns:
             print("column 'intent' is missing in df_val. Make sure to change your target variable name as 'intent")
             return
         
+        # Convert to binary class
+        df_val['is_outdomain'] = df_val['intent'].apply(lambda x: x == ood_label)
         df_test['is_outdomain'] = df_test['intent'].apply(lambda x: x == ood_label)
+
+        # Get Pred Scores
         pred_scores = self.predict_score(df_test)
+
+        #Get Best Threshold based on Val Data
+        best_thres = self.tune_threshold(df_val,ood_label,False)
+
+        # Get Pred CLS
+        pred_cls = self.predict(df_test,best_thres)
 
         benchmark_dict = {}
         benchmark_dict['fpr_95'] = fpr_n(df_test.is_outdomain, pred_scores, 0.95)
         benchmark_dict['fpr_90'] = fpr_n(df_test.is_outdomain, pred_scores, 0.90)
         benchmark_dict['aupr'] = aupr(df_test.is_outdomain, pred_scores)
         benchmark_dict['auroc'] = auroc(df_test.is_outdomain, pred_scores)
+        benchmark_dict['f1'] = fbeta_score(df_test.is_outdomain, pred_cls, beta =  1.0)
+        benchmark_dict['mcc'] = matthews_corrcoef(df_test.is_outdomain, pred_cls)
 
         return benchmark_dict
 
-    def tune_threshold(self, df_val: pd.DataFrame, ood_label: str):
+    def tune_threshold(self, df_val: pd.DataFrame, ood_label: str, do_viz: bool = True):
         if 'intent' not in df_val.columns:
             print("column 'intent' is missing in df_val. Make sure to change your target variable name as 'intent")
             return
@@ -68,23 +80,27 @@ class BaseDetector:
             recall.append(recall_score(df_val.is_outdomain, pred))
             mcc.append(matthews_corrcoef(df_val.is_outdomain, pred))
 
-        df_viz = pd.DataFrame({
-            'Precision': precision,
-            'F0.5 Score': f05,
-            'MCC': mcc,
-            'F1.5 Score': f15,
-            'Recall': recall,
-        }, index=thresholds)
-        df_viz.index.name = "Thresholds"
-        df_viz.columns.name = "Rate"
+        if do_viz:
+            df_viz = pd.DataFrame({
+                'Precision': precision,
+                'F0.5 Score': f05,
+                'MCC': mcc,
+                'F1.5 Score': f15,
+                'Recall': recall,
+            }, index=thresholds)
+            df_viz.index.name = "Thresholds"
+            df_viz.columns.name = "Rate"
 
-        fig_thresh = px.line(
-            df_viz, title='Precision, F0.5, MCC, F1.5, Recall at every threshold',
-            width=1000, height=500
-        )
+            fig_thresh = px.line(
+                df_viz, title='Precision, F0.5, MCC, F1.5, Recall at every threshold',
+                width=1000, height=500
+            )
 
-        fig_thresh.update_yaxes(range=[-0.5, 1.1], constrain='domain')
-        fig_thresh.show()
+            fig_thresh.update_yaxes(range=[-0.5, 1.1], constrain='domain')
+            fig_thresh.show()
+        else:
+            best_thres = thresholds[np.argmax(mcc)]
+            return best_thres
 
 
 def fpr_n(y_true: np.array, y_scores: np.array, n: float = 0.95):
