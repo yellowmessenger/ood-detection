@@ -1,5 +1,4 @@
 import os
-import re
 import json
 import argparse
 from ood_detection import detector_map, DataLoader
@@ -128,8 +127,12 @@ if __name__ == '__main__':
         os.makedirs(args.output_dir)
         print(f"{args.output_dir} directory is created!")
 
+    feature_extractor = args.feature_extractor
+    if len(str(args.feature_extractor).split('_'))>1: #_best_ckpt
+        feature_extractor = str(args.feature_extractor).split('_')[0]
+
     output_path = f"{args.output_dir}/{args.dataset}_{args.detector}_" +\
-                    f"{re.sub('_','-',str(args.feature_extractor))}_{args.use_best_ckpt}_{args.is_ood_label_in_train}_" +\
+                    f"{feature_extractor}_{args.use_best_ckpt}_{args.is_ood_label_in_train}_" +\
                     f"{args.ood_label}"
     if args.detector == 'ADB':
         output_path += f'_{args.adb_alpha}_{args.adb_step_size}'
