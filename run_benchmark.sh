@@ -12,6 +12,8 @@ do
                 --output_dir $output_dir \
                 --dataset $dataset \
                 --detector $detector \
+                --use_best_ckpt False \
+                --is_ood_label_in_train False \
                 --ood_label 'oos'
         done
     for feature_extractor in 'use' 'mpnet' 'bert'

@@ -106,6 +106,10 @@ class SNIPSLoader(Loader):
         data_path = Path(data_root_dir) / f"snips_{subset}_{K}_{version}.csv"
         assert data_path.exists()
         data = read_csv(data_path)
+
+        if subset == 'train':
+            data = data[data.is_ood == 0]
+
         self.in_domain_data = data[data.is_ood == 0]
         self.n_indomain = len(self.in_domain_data)
         self.ood_data = data[data.is_ood == 1]
