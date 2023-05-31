@@ -36,6 +36,9 @@ class BaseDetector:
         # Get Pred Scores
         pred_scores = self.predict_score(df_test)
 
+        if self.outdomain_is_lower == True:
+            pred_scores = -1 * pred_scores
+
         #Get Best Threshold based on Val Data
         best_thres = self.tune_threshold(df_val,ood_label,False)
 
