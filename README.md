@@ -50,7 +50,7 @@ optional arguments:
                         The output directory where all benchmarking results will be written.
   --dataset {clinc150,rostd,snips}
                         The name of the dataset to train selected
-  --detector {TrustScores,Entropy,LOF,BinaryMSP,MSP,DOC,ADB,KNN,MCDropout,BNNVI,BiEncoderCosine,BiEncoderLOF,BiEncoderMaha,BiEncoderEntropy,BiEncoderPCAEntropy,BiEncoderPCACosine,BiEncoderPCAEuclidean,RAKE,LikelihoodRatio}
+  --detector {TrustScores,Entropy,LOF,BinaryMSP,MSP,DOC,ADB,KNN,MCDropout,BNNVI,BiEncoderCosine,BiEncoderLOF,BiEncoderEuclidean,BiEncoderMaha,BiEncoderEntropy,BiEncoderPCAEntropy,BiEncoderPCACosine,BiEncoderPCAEuclidean,RAKE,LikelihoodRatio}
                         which detector to use
   --feature_extractor {mpnet,use,bert,mpnet_best_ckpt,use_best_ckpt,bert_best_ckpt}
                         which feature extractor to use
