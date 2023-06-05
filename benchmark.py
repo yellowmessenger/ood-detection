@@ -22,7 +22,7 @@ def parse_arguments():
                         required = True,
                         help="The output directory where all benchmarking results will be written.")
 
-    parser.add_argument("--dataset", choices=['clinc150','rostd','snips'], type=str, 
+    parser.add_argument("--dataset", choices=['clinc150','rostd','snips','yellow'], type=str, 
                         required = True,
                         help="The name of the dataset to train selected")
 
