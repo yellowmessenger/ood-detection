@@ -88,6 +88,10 @@ class DataLoader:
                     'test':df_test.reset_index(drop=True)}
         elif name == 'yellow':
             df_train = pd.read_csv(f"{dirname}/raw/yellow/train.csv")
+
+            if not include_ood_in_train:
+                df_train = df_train[df_train['intent']!='oos']
+
             df_val = pd.read_csv(f"{dirname}/raw/yellow/val.csv")
             df_test = pd.read_csv(f"{dirname}/raw/yellow/test.csv")
 
