@@ -86,6 +86,14 @@ class DataLoader:
             return {'train':df_train.reset_index(drop=True),
                     'val':df_val.reset_index(drop=True),
                     'test':df_test.reset_index(drop=True)}
+        elif name == 'yellow':
+            df_train = pd.read_csv(f"{dirname}/raw/yellow/train.csv")
+            df_val = pd.read_csv(f"{dirname}/raw/yellow/val.csv")
+            df_test = pd.read_csv(f"{dirname}/raw/yellow/test.csv")
+
+            return {'train':df_train.reset_index(drop=True),
+                    'val':df_val.reset_index(drop=True),
+                    'test':df_test.reset_index(drop=True)}
         else:
             print(f"data {name} not supported.")
             return

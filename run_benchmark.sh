@@ -1,6 +1,7 @@
 #!/bin/sh
 
-for dataset in 'snips' 'clinc150' 'rostd'
+# for dataset in 'snips' 'clinc150' 'rostd'
+for dataset in 'yellow'
 do
     for detector in 'RAKE' 'LikelihoodRatio'
         do
