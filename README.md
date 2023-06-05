@@ -84,7 +84,7 @@ pred_cls = det.predict(data['test'],best_threshold)
 benchmark_dict = det.benchmark(data['test'],data['val'],'oos')
 ```
 
-If you want to use custom dataset, you can add your own dataset in the `ood_detection/dataloaders/base.py` and put the data under the `ood_detection/dataloaders/raw` folder.
+If you want to use custom dataset, you can add your own dataset in the `ood_detection/dataloaders/base.py` and put the data under the `ood_detection/dataloaders/raw` folder. Just make sure your custom data has `text` and `intent` in the column names.
 
 ## Citations
 
