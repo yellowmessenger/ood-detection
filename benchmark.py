@@ -29,7 +29,7 @@ def parse_arguments():
     parser.add_argument("--detector", choices=['TrustScores','Entropy','LOF',
                                              'BinaryMSP','MSP','DOC','ADB',
                                              'KNN','MCDropout','BNNVI',
-                                             'BiEncoderCosine','BiEncoderLOF',
+                                             'BiEncoderCosine','BiEncoderLOF','BiEncoderEuclidean',
                                              'BiEncoderMaha','BiEncoderEntropy',
                                              'BiEncoderPCAEntropy','BiEncoderPCACosine',
                                              'BiEncoderPCAEuclidean','RAKE',
@@ -77,7 +77,7 @@ def run_benchmark(args):
         return
     
     if args.detector in ['BiEncoderCosine','BiEncoderLOF','BiEncoderMaha',
-                         'BiEncoderEntropy','BiEncoderPCAEntropy',
+                         'BiEncoderEntropy','BiEncoderPCAEntropy', 'BiEncoderEuclidean',
                          'BiEncoderPCACosine','BiEncoderPCAEuclidean',
                          'Entropy','KNN','LOF','TrustScores','BinaryMSP']:
         detector = detector(args.feature_extractor,args.ood_label)
@@ -95,7 +95,7 @@ def run_benchmark(args):
 
     #Fitting the detector
     if args.detector in ['BiEncoderCosine','BiEncoderLOF','BiEncoderMaha',
-                         'BiEncoderEntropy','BiEncoderPCAEntropy',
+                         'BiEncoderEntropy','BiEncoderPCAEntropy', 'BiEncoderEuclidean',
                          'BiEncoderPCACosine','BiEncoderPCAEuclidean',
                          'ADB','BNNVI','KNN','RAKE']:
         history = detector.fit(data['train'])
