@@ -39,7 +39,7 @@ You can get the benchmarking results for a specific method via the `benhcmark.py
 
 ```
 usage: benchmark.py [-h] --output_dir OUTPUT_DIR --dataset {clinc150,rostd,snips} --detector
-                    {TrustScores,Entropy,LOF,BinaryMSP,MSP,DOC,ADB,KNN,MCDropout,BNNVI,BiEncoderCosine,BiEncoderLOF,BiEncoderMaha,BiEncoderEntropy,BiEncoderPCAEntropy,BiEncoderPCACosine,BiEncoderPCAEuclidean,RAKE,LikelihoodRatio}
+                    {TrustScores,Entropy,LOF,BinaryMSP,MSP,DOC,ADB,KNN,MCDropout,BNNVI,BiEncoderCosine,BiEncoderLOF,BiEncoderEuclidean,BiEncoderMaha,BiEncoderEntropy,BiEncoderPCAEntropy,BiEncoderPCACosine,BiEncoderPCAEuclidean,RAKE,LikelihoodRatio}
                     [--feature_extractor {mpnet,use,bert,mpnet_best_ckpt,use_best_ckpt,bert_best_ckpt}]
                     [--use_best_ckpt USE_BEST_CKPT] [--is_ood_label_in_train IS_OOD_LABEL_IN_TRAIN] --ood_label
                     OOD_LABEL [--adb_alpha ADB_ALPHA] [--adb_step_size ADB_STEP_SIZE]
