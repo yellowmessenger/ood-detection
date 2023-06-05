@@ -19,6 +19,14 @@ matplotlib = "^3.7.1"
 tensorflow-hub = "^0.13.0"
 sentence-transformers = "^2.2.2"
 plotly = "^5.14.1"
+tensorflow-probability = "^0.20.0"
+rake-nltk = "^1.0.6"
+flashtext = "^2.7"
+gensim = "^4.3.1"
+pytorch-lightning = "0.7.3"
+bcolz-zipline = "^1.2.6"
+munch = "^3.0.0"
+hydra-core = "^1.3.2"
 
 
 [build-system]
