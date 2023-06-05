@@ -3,28 +3,27 @@
 for dataset in 'snips' 'clinc150' 'rostd'
 # for dataset in 'yellow'
 do
-    # for detector in 'RAKE' 'LikelihoodRatio'
-    #     do
-    #     output_dir='./benchmarking_results'
-    #     echo 'Dataset:' $dataset
-    #     echo 'Detector:' $detector
-    #     echo 'Output Dir:' $output_dir
-    #     python benchmark.py \
-    #             --output_dir $output_dir \
-    #             --dataset $dataset \
-    #             --detector $detector \
-    #             --use_best_ckpt False \
-    #             --is_ood_label_in_train False \
-    #             --ood_label 'oos'
-    #     done
+    for detector in 'RAKE' 'LikelihoodRatio'
+        do
+        output_dir='./benchmarking_results'
+        echo 'Dataset:' $dataset
+        echo 'Detector:' $detector
+        echo 'Output Dir:' $output_dir
+        python benchmark.py \
+                --output_dir $output_dir \
+                --dataset $dataset \
+                --detector $detector \
+                --use_best_ckpt False \
+                --is_ood_label_in_train False \
+                --ood_label 'oos'
+        done
     for feature_extractor in 'use' 'mpnet' 'bert'
     do
         for use_best_ckpt in False True
         do
             for is_ood_label_in_train in False True
             do
-                # for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'BiEncoderCosine' 'BiEncoderEuclidean' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean'
-                for detector in 'BiEncoderEuclidean'
+                for detector in 'TrustScores' 'Entropy' 'LOF' 'BinaryMSP' 'MSP' 'DOC' 'ADB' 'KNN' 'BiEncoderCosine' 'BiEncoderEuclidean' 'BiEncoderLOF' 'BiEncoderMaha' 'BiEncoderEntropy' 'BiEncoderPCAEntropy' 'BiEncoderPCACosine' 'BiEncoderPCAEuclidean'
                 do
                     if [ \( "$use_best_ckpt" = "True" -a \( "$detector" = "BinaryMSP" -o "$detector" = "DOC" -o "$detector" = "Entropy" -o "$detector" = "LOF" -o "$detector" = "MSP" -o "$detector" = "TrustScores" \) \) -o "$use_best_ckpt" = "False" ]
                     then
