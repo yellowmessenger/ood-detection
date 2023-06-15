@@ -1,15 +1,17 @@
-# OOD-Detection
+# BED: Bi-Encoder-Based Detectors for Out-of-Distribution Detection
 
-...
+This repository contains the code for the work "BED: Bi-Encoder-Based Detectors for Out-of-Distribution Detection"
 
-## Introduction
+## Abstract
 
-...
+```
+This paper introduces a novel method leveraging bi-encoder-based detectors along with a comprehensive study comparing different out-of-distribution (OOD) detection methods in NLP using different feature extractors. The feature extraction stage employs popular methods such as Universal Sentence Encoder (USE), BERT, MPNET, and GLOVE to extract informative representations from textual data. The evaluation is conducted on several datasets, including CLINC150, ROSTD-Coarse, SNIPS, and YELLOW. Performance is assessed using metrics such as F1-Score, MCC, FPR@90, FPR@95, AUPR, an AUROC. The experimental results demonstrate that the proposed bi-encoder-based detectors outperform other methods, both those that require OOD labels in training and those that do not, across all datasets, showing great potential for OOD detection in NLP. The simplicity of the training process and the superior detection performance make them applicable to real-world scenarios. The presented methods and benchmarking metrics serve as a valuable resource for future research in OOD detection, enabling further advancements in this field. The code and implementation details can be found on our GitHub repository: https://github.com/yellowmessenger/ood-detection.
+```
 
 
 ## Quick Start
 
-1. Use anaconda to create Python (version >= 3.8) environment with Poetry
+1. Use anaconda to create Python (version = 3.8) environment with Poetry
 ```
 conda create --name ood_detection python=3.8 poetry=1.4.0
 conda activate ood_detection
@@ -31,6 +33,12 @@ poetry install
 
 ```
 sh run_benchmark.sh
+```
+
+6. Generate the benchmarking table
+
+```
+python get_benchmarking_table.py --results_dir ./benchmarking_results --output_dir .
 ```
 
 ## Usage
@@ -97,7 +105,7 @@ If this work is helpful, or you want to use the codes and results in this repo, 
 
 ## Contributors
 
-[Louis Owen](https://github.com/louisowen6), 
+[Louis Owen](https://www.linkedin.com/in/louisowen/), [Biddwan Ahmed](https://www.linkedin.com/in/biddwan-ahmed-917333126/), [Abhay Kumar](https://www.linkedin.com/in/akanyaani/)
 
 ## Bugs or questions?
 
