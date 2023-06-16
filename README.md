@@ -1,6 +1,6 @@
 # BED: Bi-Encoder-Based Detectors for Out-of-Distribution Detection
 
-This repository contains the code for the work "BED: Bi-Encoder-Based Detectors for Out-of-Distribution Detection"
+This repository contains the code for the work [BED: Bi-Encoder-Based Detectors for Out-of-Distribution Detection](https://arxiv.org/abs/2306.08852)
 
 ## Abstract
 
@@ -95,8 +95,15 @@ If you want to use custom dataset, you can add your own dataset in the `ood_dete
 
 If this work is helpful, or you want to use the codes and results in this repo, please cite our paper:
 
-```
-
+```bibtex
+@misc{owen2023bed,
+    title={BED: Bi-Encoder-Based Detectors for Out-of-Distribution Detection},
+    author={Louis Owen and Biddwan Ahmed and Abhay Kumar},
+    year={2023},
+    eprint={2306.08852},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+}
 ```
 
 
